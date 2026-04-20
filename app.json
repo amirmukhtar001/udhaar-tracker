@@ -1,0 +1,14 @@
+{
+  "expo": {
+    "name": "Udhaar Tracker",
+    "slug": "udhaar-tracker",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "assetBundlePatterns": ["**/*"],
+    "android": {
+      "package": "com.udhaartracker.app"
+    },
+    "plugins": ["expo-notifications"]
+  }
+}
