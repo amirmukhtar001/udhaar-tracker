@@ -12,9 +12,22 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { addLoan } from "../storage/loanStorage";
 import { scheduleLoanReminder } from "../utils/notification";
 
-function formatDate(date) {
-  if (!date) return "Select reminder date (optional)";
+const REPEAT_OPTIONS = [
+  { key: "NONE", label: "One-time" },
+  { key: "DAILY", label: "Daily" },
+  { key: "WEEKLY", label: "Weekly" }
+];
+
+function formatDatePart(date) {
+  if (!date) return "Not set";
   return date.toISOString().split("T")[0];
+}
+
+function formatTimePart(date) {
+  if (!date) return "Not set";
+  const hh = String(date.getHours()).padStart(2, "0");
+  const mm = String(date.getMinutes()).padStart(2, "0");
+  return `${hh}:${mm}`;
 }
 
 export default function AddLoanScreen({ navigation }) {
@@ -22,15 +35,39 @@ export default function AddLoanScreen({ navigation }) {
   const [amount, setAmount] = useState("");
   const [note, setNote] = useState("");
   const [reminderDate, setReminderDate] = useState(null);
-  const [showPicker, setShowPicker] = useState(false);
+  const [reminderRepeat, setReminderRepeat] = useState("NONE");
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showTimePicker, setShowTimePicker] = useState(false);
 
   const onDateChange = (_, selectedDate) => {
     if (Platform.OS === "android") {
-      setShowPicker(false);
+      setShowDatePicker(false);
     }
     if (selectedDate) {
-      setReminderDate(selectedDate);
+      const current = reminderDate || new Date();
+      const merged = new Date(selectedDate);
+      merged.setHours(current.getHours(), current.getMinutes(), 0, 0);
+      setReminderDate(merged);
     }
+  };
+
+  const onTimeChange = (_, selectedDate) => {
+    if (Platform.OS === "android") {
+      setShowTimePicker(false);
+    }
+    if (selectedDate) {
+      const current = reminderDate || new Date();
+      const merged = new Date(current);
+      merged.setHours(selectedDate.getHours(), selectedDate.getMinutes(), 0, 0);
+      setReminderDate(merged);
+    }
+  };
+
+  const clearReminder = () => {
+    setReminderDate(null);
+    setReminderRepeat("NONE");
+    setShowDatePicker(false);
+    setShowTimePicker(false);
   };
 
   const handleSave = async () => {
@@ -45,6 +82,10 @@ export default function AddLoanScreen({ navigation }) {
       Alert.alert("Validation", "Amount must be greater than 0.");
       return;
     }
+    if (reminderDate && reminderRepeat === "NONE" && reminderDate <= new Date()) {
+      Alert.alert("Validation", "Reminder date/time must be in the future for one-time reminders.");
+      return;
+    }
 
     const loan = {
       id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
@@ -54,6 +95,7 @@ export default function AddLoanScreen({ navigation }) {
       payments: [],
       date: new Date().toISOString().split("T")[0],
       reminderDate: reminderDate ? reminderDate.toISOString() : null,
+      reminderRepeat,
       isPaid: false,
       createdAt: new Date().toISOString(),
       notificationId: null
@@ -94,18 +136,54 @@ export default function AddLoanScreen({ navigation }) {
         style={styles.input}
       />
 
-      <Text style={styles.label}>Reminder Date (optional)</Text>
-      <TouchableOpacity style={styles.dateBtn} onPress={() => setShowPicker(true)}>
-        <Text style={styles.dateBtnText}>{formatDate(reminderDate)}</Text>
+      <Text style={styles.label}>Reminder Date & Time (optional)</Text>
+      <TouchableOpacity style={styles.dateBtn} onPress={() => setShowDatePicker(true)}>
+        <Text style={styles.dateBtnText}>Date: {formatDatePart(reminderDate)}</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={styles.dateBtn} onPress={() => setShowTimePicker(true)}>
+        <Text style={styles.dateBtnText}>Time: {formatTimePart(reminderDate)}</Text>
       </TouchableOpacity>
 
-      {showPicker && (
+      <Text style={styles.label}>Repeat</Text>
+      <View style={styles.repeatRow}>
+        {REPEAT_OPTIONS.map((option) => {
+          const isActive = reminderRepeat === option.key;
+          return (
+            <TouchableOpacity
+              key={option.key}
+              style={[styles.repeatChip, isActive ? styles.repeatChipActive : null]}
+              onPress={() => setReminderRepeat(option.key)}
+            >
+              <Text style={[styles.repeatChipText, isActive ? styles.repeatChipTextActive : null]}>
+                {option.label}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+
+      {reminderDate ? (
+        <TouchableOpacity style={styles.clearBtn} onPress={clearReminder}>
+          <Text style={styles.clearBtnText}>Clear Reminder</Text>
+        </TouchableOpacity>
+      ) : null}
+
+      {showDatePicker && (
         <DateTimePicker
           value={reminderDate || new Date()}
           mode="date"
           display="default"
           onChange={onDateChange}
           minimumDate={new Date()}
+        />
+      )}
+
+      {showTimePicker && (
+        <DateTimePicker
+          value={reminderDate || new Date()}
+          mode="time"
+          display="default"
+          onChange={onTimeChange}
         />
       )}
 
@@ -139,10 +217,43 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#d1d5db",
     borderRadius: 10,
-    padding: 12
+    padding: 12,
+    marginBottom: 8
   },
   dateBtnText: {
     color: "#111827"
+  },
+  repeatRow: {
+    flexDirection: "row",
+    flexWrap: "wrap"
+  },
+  repeatChip: {
+    borderWidth: 1,
+    borderColor: "#d1d5db",
+    borderRadius: 999,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    marginRight: 8,
+    marginBottom: 8
+  },
+  repeatChipActive: {
+    backgroundColor: "#111827",
+    borderColor: "#111827"
+  },
+  repeatChipText: {
+    color: "#374151",
+    fontWeight: "600"
+  },
+  repeatChipTextActive: {
+    color: "#fff"
+  },
+  clearBtn: {
+    alignSelf: "flex-start",
+    marginTop: 2
+  },
+  clearBtnText: {
+    color: "#dc2626",
+    fontWeight: "600"
   },
   saveBtn: {
     marginTop: 24,

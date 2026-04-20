@@ -5,7 +5,8 @@ const LOANS_KEY = "loans";
 function normalizeLoan(loan) {
   return {
     ...loan,
-    payments: Array.isArray(loan.payments) ? loan.payments : []
+    payments: Array.isArray(loan.payments) ? loan.payments : [],
+    reminderRepeat: loan.reminderRepeat || "NONE"
   };
 }
 

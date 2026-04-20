@@ -27,8 +27,30 @@ export async function scheduleLoanReminder(loan) {
   if (!loan?.reminderDate) return null;
 
   const triggerDate = new Date(loan.reminderDate);
-  if (Number.isNaN(triggerDate.getTime()) || triggerDate <= new Date()) {
+  if (Number.isNaN(triggerDate.getTime())) {
     return null;
+  }
+
+  const reminderRepeat = loan.reminderRepeat || "NONE";
+  let trigger = triggerDate;
+
+  if (reminderRepeat === "NONE") {
+    if (triggerDate <= new Date()) {
+      return null;
+    }
+  } else if (reminderRepeat === "DAILY") {
+    trigger = {
+      hour: triggerDate.getHours(),
+      minute: triggerDate.getMinutes(),
+      repeats: true
+    };
+  } else if (reminderRepeat === "WEEKLY") {
+    trigger = {
+      weekday: triggerDate.getDay() + 1,
+      hour: triggerDate.getHours(),
+      minute: triggerDate.getMinutes(),
+      repeats: true
+    };
   }
 
   const id = await Notifications.scheduleNotificationAsync({
@@ -36,7 +58,7 @@ export async function scheduleLoanReminder(loan) {
       title: "Udhaar Reminder",
       body: `${loan.name} owes you Rs. ${loan.amount}`
     },
-    trigger: triggerDate
+    trigger
   });
 
   return id;

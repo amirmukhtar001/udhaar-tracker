@@ -24,6 +24,15 @@ function formatShortDate(dateInput) {
   return date.toISOString().split("T")[0];
 }
 
+function formatShortTime(dateInput) {
+  if (!dateInput) return "-";
+  const date = new Date(dateInput);
+  if (Number.isNaN(date.getTime())) return "-";
+  const hh = String(date.getHours()).padStart(2, "0");
+  const mm = String(date.getMinutes()).padStart(2, "0");
+  return `${hh}:${mm}`;
+}
+
 export default function DetailScreen({ route, navigation }) {
   const { loanId } = route.params;
   const [loan, setLoan] = useState(null);
@@ -94,7 +103,9 @@ export default function DetailScreen({ route, navigation }) {
         {row("Remaining", `Rs. ${remainingAmount}`)}
         {row("Note", loan.note || "-")}
         {row("Date", loan.date)}
-        {row("Reminder", loan.reminderDate ? loan.reminderDate.split("T")[0] : "-")}
+        {row("Reminder Date", formatShortDate(loan.reminderDate))}
+        {row("Reminder Time", formatShortTime(loan.reminderDate))}
+        {row("Reminder Repeat", loan.reminderRepeat || "NONE")}
         {row("Status", statusText)}
       </View>
 
