@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
 import { getLoans, deleteLoan, updateLoan } from "../storage/loanStorage";
 import {
   cancelLoanReminder,
@@ -19,14 +20,16 @@ export default function DetailScreen({ route, navigation }) {
   const { loanId } = route.params;
   const [loan, setLoan] = useState(null);
 
-  useEffect(() => {
-    const load = async () => {
-      const loans = await getLoans();
-      const found = loans.find((item) => item.id === loanId);
-      setLoan(found || null);
-    };
-    load();
-  }, [loanId]);
+  useFocusEffect(
+    useCallback(() => {
+      const load = async () => {
+        const loans = await getLoans();
+        const found = loans.find((item) => item.id === loanId);
+        setLoan(found || null);
+      };
+      load();
+    }, [loanId])
+  );
 
   const toggleStatus = async () => {
     if (!loan) return;
@@ -86,6 +89,13 @@ export default function DetailScreen({ route, navigation }) {
         </Text>
       </TouchableOpacity>
 
+      <TouchableOpacity
+        style={styles.editBtn}
+        onPress={() => navigation.navigate("EditLoan", { loanId: loan.id })}
+      >
+        <Text style={styles.btnText}>Edit Loan</Text>
+      </TouchableOpacity>
+
       <TouchableOpacity style={styles.deleteBtn} onPress={onDelete}>
         <Text style={styles.btnText}>Delete Loan</Text>
       </TouchableOpacity>
@@ -125,6 +135,13 @@ const styles = StyleSheet.create({
   deleteBtn: {
     marginTop: 10,
     backgroundColor: "#ef4444",
+    borderRadius: 10,
+    alignItems: "center",
+    paddingVertical: 12
+  },
+  editBtn: {
+    marginTop: 10,
+    backgroundColor: "#6b7280",
     borderRadius: 10,
     alignItems: "center",
     paddingVertical: 12

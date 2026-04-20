@@ -4,6 +4,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import HomeScreen from "../screens/HomeScreen";
 import AddLoanScreen from "../screens/AddLoanScreen";
 import DetailScreen from "../screens/DetailScreen";
+import EditLoanScreen from "../screens/EditLoanScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -25,6 +26,11 @@ export default function AppNavigator() {
           name="Detail"
           component={DetailScreen}
           options={{ title: "Loan Detail" }}
+        />
+        <Stack.Screen
+          name="EditLoan"
+          component={EditLoanScreen}
+          options={{ title: "Edit Loan" }}
         />
       </Stack.Navigator>
     </NavigationContainer>

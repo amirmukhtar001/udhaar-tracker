@@ -5,7 +5,8 @@ import {
   StyleSheet,
   FlatList,
   TouchableOpacity,
-  Alert
+  Alert,
+  TextInput
 } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import LoanItem from "../components/LoanItem";
@@ -17,6 +18,15 @@ import {
 
 export default function HomeScreen({ navigation }) {
   const [loans, setLoans] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [activeFilter, setActiveFilter] = useState("ALL");
+
+  const isOverdue = useCallback((loan) => {
+    if (loan.isPaid || !loan.reminderDate) return false;
+    const due = new Date(loan.reminderDate);
+    if (Number.isNaN(due.getTime())) return false;
+    return due < new Date();
+  }, []);
 
   const loadLoans = useCallback(async () => {
     const data = await getLoans();
@@ -33,6 +43,27 @@ export default function HomeScreen({ navigation }) {
   const totalPending = loans
     .filter((loan) => !loan.isPaid)
     .reduce((sum, loan) => sum + Number(loan.amount || 0), 0);
+
+  const normalizedQuery = searchQuery.trim().toLowerCase();
+
+  const filteredLoans = loans.filter((loan) => {
+    const name = String(loan.name || "").toLowerCase();
+    const note = String(loan.note || "").toLowerCase();
+    const amount = String(loan.amount || "").toLowerCase();
+    const matchesSearch =
+      !normalizedQuery ||
+      name.includes(normalizedQuery) ||
+      note.includes(normalizedQuery) ||
+      amount.includes(normalizedQuery);
+
+    if (!matchesSearch) return false;
+
+    if (activeFilter === "UNPAID") return !loan.isPaid;
+    if (activeFilter === "PAID") return loan.isPaid;
+    if (activeFilter === "OVERDUE") return isOverdue(loan);
+
+    return true;
+  });
 
   const handleTogglePaid = async (loan) => {
     const nextPaid = !loan.isPaid;
@@ -78,8 +109,37 @@ export default function HomeScreen({ navigation }) {
         <Text style={styles.addBtnText}>+ Add Loan</Text>
       </TouchableOpacity>
 
+      <TextInput
+        value={searchQuery}
+        onChangeText={setSearchQuery}
+        placeholder="Search by name, note, amount"
+        style={styles.searchInput}
+      />
+
+      <View style={styles.filtersRow}>
+        {[
+          { key: "ALL", label: "All" },
+          { key: "UNPAID", label: "Unpaid" },
+          { key: "PAID", label: "Paid" },
+          { key: "OVERDUE", label: "Overdue" }
+        ].map((filter) => {
+          const isActive = activeFilter === filter.key;
+          return (
+            <TouchableOpacity
+              key={filter.key}
+              style={[styles.filterChip, isActive ? styles.filterChipActive : null]}
+              onPress={() => setActiveFilter(filter.key)}
+            >
+              <Text style={[styles.filterChipText, isActive ? styles.filterChipTextActive : null]}>
+                {filter.label}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+
       <FlatList
-        data={loans}
+        data={filteredLoans}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <LoanItem
@@ -92,7 +152,11 @@ export default function HomeScreen({ navigation }) {
         contentContainerStyle={styles.listContent}
         ListEmptyComponent={
           <View style={styles.emptyBox}>
-            <Text style={styles.emptyText}>No loans yet. Add your first udhaar.</Text>
+            <Text style={styles.emptyText}>
+              {loans.length === 0
+                ? "No loans yet. Add your first udhaar."
+                : "No loans match your search/filter."}
+            </Text>
           </View>
         }
       />
@@ -129,6 +193,41 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "700",
     fontSize: 16
+  },
+  searchInput: {
+    backgroundColor: "#fff",
+    borderWidth: 1,
+    borderColor: "#d1d5db",
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    marginBottom: 10
+  },
+  filtersRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    marginBottom: 10
+  },
+  filterChip: {
+    borderWidth: 1,
+    borderColor: "#d1d5db",
+    borderRadius: 999,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    backgroundColor: "#fff",
+    marginRight: 8,
+    marginBottom: 8
+  },
+  filterChipActive: {
+    backgroundColor: "#2563eb",
+    borderColor: "#2563eb"
+  },
+  filterChipText: {
+    color: "#374151",
+    fontWeight: "600"
+  },
+  filterChipTextActive: {
+    color: "#fff"
   },
   listContent: {
     paddingBottom: 30
