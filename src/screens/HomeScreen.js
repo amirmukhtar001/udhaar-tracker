@@ -97,9 +97,15 @@ export default function HomeScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <View style={styles.summaryCard}>
-        <Text style={styles.summaryText}>Total Given: Rs. {totalGiven}</Text>
-        <Text style={styles.summaryText}>Total Pending: Rs. {totalPending}</Text>
+      <View style={styles.summaryRow}>
+        <View style={[styles.statCard, styles.givenCard]}>
+          <Text style={styles.statLabel}>Total Given</Text>
+          <Text style={styles.statValue}>Rs. {totalGiven}</Text>
+        </View>
+        <View style={[styles.statCard, styles.pendingCard]}>
+          <Text style={styles.statLabel}>Total Pending</Text>
+          <Text style={styles.statValue}>Rs. {totalPending}</Text>
+        </View>
       </View>
 
       <TouchableOpacity
@@ -170,17 +176,32 @@ const styles = StyleSheet.create({
     backgroundColor: "#f3f4f6",
     padding: 16
   },
-  summaryCard: {
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    padding: 12,
+  summaryRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
     marginBottom: 12
   },
-  summaryText: {
-    fontSize: 15,
+  statCard: {
+    width: "48.5%",
+    borderRadius: 12,
+    padding: 14
+  },
+  givenCard: {
+    backgroundColor: "#dbeafe"
+  },
+  pendingCard: {
+    backgroundColor: "#fee2e2"
+  },
+  statLabel: {
+    fontSize: 13,
+    color: "#374151",
+    marginBottom: 6
+  },
+  statValue: {
+    fontSize: 18,
     color: "#111827",
     fontWeight: "600",
-    marginBottom: 4
+    letterSpacing: 0.2
   },
   addBtn: {
     backgroundColor: "#2563eb",
