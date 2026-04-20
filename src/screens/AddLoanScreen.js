@@ -51,6 +51,7 @@ export default function AddLoanScreen({ navigation }) {
       name: cleanName,
       amount: numericAmount,
       note: note.trim(),
+      payments: [],
       date: new Date().toISOString().split("T")[0],
       reminderDate: reminderDate ? reminderDate.toISOString() : null,
       isPaid: false,

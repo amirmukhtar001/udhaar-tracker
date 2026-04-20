@@ -22,9 +22,22 @@ function ActionButton({ label, color, onPress }) {
   );
 }
 
-export default function LoanItem({ loan, onPress, onTogglePaid, onDelete }) {
+export default function LoanItem({
+  loan,
+  isOverdue = false,
+  overdueDays = 0,
+  remainingAmount = Number(loan.amount || 0),
+  statusText = loan.isPaid ? "Paid" : "Unpaid",
+  onPress,
+  onAddPayment,
+  onEdit,
+  onTogglePaid,
+  onDelete
+}) {
   const renderRightActions = () => (
     <View style={styles.actions}>
+      <ActionButton label="Pay" color="#2563eb" onPress={onAddPayment} />
+      <ActionButton label="Edit" color="#6b7280" onPress={onEdit} />
       <ActionButton
         label={loan.isPaid ? "Unpaid" : "Paid"}
         color={loan.isPaid ? "#f59e0b" : "#22c55e"}
@@ -40,11 +53,22 @@ export default function LoanItem({ loan, onPress, onTogglePaid, onDelete }) {
         <View>
           <Text style={styles.name}>{loan.name}</Text>
           <Text style={styles.note}>{loan.note || "No note"}</Text>
+          {isOverdue ? (
+            <View style={styles.overdueBadge}>
+              <Text style={styles.overdueText}>Overdue by {overdueDays} day(s)</Text>
+            </View>
+          ) : null}
         </View>
         <View style={styles.right}>
           <Text style={styles.amount}>Rs. {loan.amount}</Text>
-          <Text style={[styles.status, loan.isPaid ? styles.paid : styles.unpaid]}>
-            {loan.isPaid ? "Paid" : "Unpaid"}
+          <Text style={styles.remaining}>Remaining: Rs. {remainingAmount}</Text>
+          <Text
+            style={[
+              styles.status,
+              statusText === "Paid" ? styles.paid : statusText === "Partially Paid" ? styles.partial : styles.unpaid
+            ]}
+          >
+            {statusText}
           </Text>
         </View>
       </TouchableOpacity>
@@ -72,6 +96,19 @@ const styles = StyleSheet.create({
     marginTop: 4,
     color: "#6b7280"
   },
+  overdueBadge: {
+    marginTop: 6,
+    alignSelf: "flex-start",
+    backgroundColor: "#fee2e2",
+    borderRadius: 999,
+    paddingHorizontal: 10,
+    paddingVertical: 3
+  },
+  overdueText: {
+    color: "#b91c1c",
+    fontWeight: "700",
+    fontSize: 12
+  },
   right: {
     alignItems: "flex-end"
   },
@@ -80,12 +117,21 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: "#111827"
   },
+  remaining: {
+    marginTop: 4,
+    fontSize: 12,
+    color: "#6b7280",
+    fontWeight: "600"
+  },
   status: {
     marginTop: 4,
     fontWeight: "700"
   },
   paid: {
     color: "#16a34a"
+  },
+  partial: {
+    color: "#d97706"
   },
   unpaid: {
     color: "#dc2626"
@@ -95,7 +141,7 @@ const styles = StyleSheet.create({
     marginBottom: 12
   },
   actionBtn: {
-    width: 80,
+    width: 72,
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 8,

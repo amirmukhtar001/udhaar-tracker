@@ -14,6 +14,7 @@ import {
   cancelLoanReminder,
   scheduleLoanReminder
 } from "../utils/notification";
+import { getTotalPaid } from "../utils/loanMath";
 
 function formatDate(date) {
   if (!date) return "Select reminder date (optional)";
@@ -108,7 +109,8 @@ export default function EditLoanScreen({ route, navigation }) {
         amount: numericAmount,
         note: note.trim(),
         reminderDate: nextReminderDate,
-        notificationId
+        notificationId,
+        isPaid: getTotalPaid(loan) >= numericAmount
       });
 
       navigation.goBack();

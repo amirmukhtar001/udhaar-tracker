@@ -5,6 +5,9 @@ import HomeScreen from "../screens/HomeScreen";
 import AddLoanScreen from "../screens/AddLoanScreen";
 import DetailScreen from "../screens/DetailScreen";
 import EditLoanScreen from "../screens/EditLoanScreen";
+import AddPaymentScreen from "../screens/AddPaymentScreen";
+import DashboardScreen from "../screens/DashboardScreen";
+import BorrowersScreen from "../screens/BorrowersScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -31,6 +34,21 @@ export default function AppNavigator() {
           name="EditLoan"
           component={EditLoanScreen}
           options={{ title: "Edit Loan" }}
+        />
+        <Stack.Screen
+          name="AddPayment"
+          component={AddPaymentScreen}
+          options={{ title: "Add Payment" }}
+        />
+        <Stack.Screen
+          name="Dashboard"
+          component={DashboardScreen}
+          options={{ title: "Dashboard" }}
+        />
+        <Stack.Screen
+          name="Borrowers"
+          component={BorrowersScreen}
+          options={{ title: "Borrowers" }}
         />
       </Stack.Navigator>
     </NavigationContainer>
