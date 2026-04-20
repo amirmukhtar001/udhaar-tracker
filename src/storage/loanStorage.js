@@ -1,7 +1,9 @@
 import { DEFAULT_LANGUAGE } from "../i18n/translations";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { isSupabaseConfigured, supabase } from "../lib/supabaseClient";
 
 const LOANS_KEY = "loans";
+const LOANS_TABLE = "loans";
 
 function normalizeLoan(loan) {
   return {
@@ -12,12 +14,105 @@ function normalizeLoan(loan) {
   };
 }
 
+function fromRemoteRow(row) {
+  return normalizeLoan({
+    id: row.id,
+    name: row.name,
+    amount: Number(row.amount || 0),
+    note: row.note || "",
+    payments: Array.isArray(row.payments) ? row.payments : [],
+    date: row.loan_date || row.created_at?.split("T")[0],
+    reminderDate: row.reminder_date || null,
+    reminderRepeat: row.reminder_repeat || "NONE",
+    isPaid: Boolean(row.is_paid),
+    createdAt: row.created_at || new Date().toISOString(),
+    notificationId: row.notification_id || null,
+    language: row.language || DEFAULT_LANGUAGE
+  });
+}
+
+function toRemoteRow(loan) {
+  const normalized = normalizeLoan(loan);
+  return {
+    id: normalized.id,
+    name: normalized.name,
+    amount: Number(normalized.amount || 0),
+    note: normalized.note || "",
+    payments: normalized.payments,
+    loan_date: normalized.date,
+    reminder_date: normalized.reminderDate,
+    reminder_repeat: normalized.reminderRepeat || "NONE",
+    is_paid: Boolean(normalized.isPaid),
+    created_at: normalized.createdAt || new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    notification_id: normalized.notificationId || null,
+    language: normalized.language || DEFAULT_LANGUAGE
+  };
+}
+
+function toRemotePatch(data) {
+  const patch = { updated_at: new Date().toISOString() };
+
+  if (Object.prototype.hasOwnProperty.call(data, "name")) patch.name = data.name;
+  if (Object.prototype.hasOwnProperty.call(data, "amount")) patch.amount = Number(data.amount || 0);
+  if (Object.prototype.hasOwnProperty.call(data, "note")) patch.note = data.note || "";
+  if (Object.prototype.hasOwnProperty.call(data, "payments")) {
+    patch.payments = Array.isArray(data.payments) ? data.payments : [];
+  }
+  if (Object.prototype.hasOwnProperty.call(data, "date")) patch.loan_date = data.date;
+  if (Object.prototype.hasOwnProperty.call(data, "reminderDate")) patch.reminder_date = data.reminderDate;
+  if (Object.prototype.hasOwnProperty.call(data, "reminderRepeat")) {
+    patch.reminder_repeat = data.reminderRepeat || "NONE";
+  }
+  if (Object.prototype.hasOwnProperty.call(data, "isPaid")) patch.is_paid = Boolean(data.isPaid);
+  if (Object.prototype.hasOwnProperty.call(data, "notificationId")) {
+    patch.notification_id = data.notificationId || null;
+  }
+  if (Object.prototype.hasOwnProperty.call(data, "language")) {
+    patch.language = data.language || DEFAULT_LANGUAGE;
+  }
+
+  return patch;
+}
+
+async function getLocalLoans() {
+  const data = await AsyncStorage.getItem(LOANS_KEY);
+  const parsed = data ? JSON.parse(data) : [];
+  if (!Array.isArray(parsed)) return [];
+  return parsed.map(normalizeLoan);
+}
+
+async function syncLoansFromRemote() {
+  if (!isSupabaseConfigured || !supabase) return getLocalLoans();
+
+  const { data, error } = await supabase
+    .from(LOANS_TABLE)
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    throw error;
+  }
+
+  const mapped = Array.isArray(data) ? data.map(fromRemoteRow) : [];
+  await saveLoans(mapped);
+  return mapped;
+}
+
 export async function getLoans() {
   try {
-    const data = await AsyncStorage.getItem(LOANS_KEY);
-    const parsed = data ? JSON.parse(data) : [];
-    if (!Array.isArray(parsed)) return [];
-    return parsed.map(normalizeLoan);
+    const localLoans = await getLocalLoans();
+
+    if (!isSupabaseConfigured || !supabase) {
+      return localLoans;
+    }
+
+    try {
+      return await syncLoansFromRemote();
+    } catch (remoteError) {
+      console.warn("Supabase sync failed, using local cache", remoteError);
+      return localLoans;
+    }
   } catch (error) {
     console.warn("Failed to load loans", error);
     return [];
@@ -29,23 +124,63 @@ export async function saveLoans(loans) {
 }
 
 export async function addLoan(loan) {
-  const loans = await getLoans();
-  const updated = [normalizeLoan(loan), ...loans];
+  const normalized = normalizeLoan(loan);
+
+  if (isSupabaseConfigured && supabase) {
+    try {
+      const { error } = await supabase.from(LOANS_TABLE).insert(toRemoteRow(normalized));
+      if (!error) {
+        return await syncLoansFromRemote();
+      }
+      console.warn("Supabase add loan failed, saving locally", error);
+    } catch (remoteError) {
+      console.warn("Supabase add loan failed, saving locally", remoteError);
+    }
+  }
+
+  const loans = await getLocalLoans();
+  const updated = [normalized, ...loans];
   await saveLoans(updated);
   return updated;
 }
 
 export async function updateLoan(id, data) {
-  const loans = await getLoans();
-  const updated = loans.map((loan) =>
-    loan.id === id ? { ...loan, ...data } : loan
-  );
+  if (isSupabaseConfigured && supabase) {
+    try {
+      const { error } = await supabase
+        .from(LOANS_TABLE)
+        .update(toRemotePatch(data))
+        .eq("id", id);
+
+      if (!error) {
+        return await syncLoansFromRemote();
+      }
+      console.warn("Supabase update loan failed, using local cache", error);
+    } catch (remoteError) {
+      console.warn("Supabase update loan failed, using local cache", remoteError);
+    }
+  }
+
+  const loans = await getLocalLoans();
+  const updated = loans.map((loan) => (loan.id === id ? normalizeLoan({ ...loan, ...data }) : loan));
   await saveLoans(updated);
   return updated;
 }
 
 export async function deleteLoan(id) {
-  const loans = await getLoans();
+  if (isSupabaseConfigured && supabase) {
+    try {
+      const { error } = await supabase.from(LOANS_TABLE).delete().eq("id", id);
+      if (!error) {
+        return await syncLoansFromRemote();
+      }
+      console.warn("Supabase delete loan failed, using local cache", error);
+    } catch (remoteError) {
+      console.warn("Supabase delete loan failed, using local cache", remoteError);
+    }
+  }
+
+  const loans = await getLocalLoans();
   const updated = loans.filter((loan) => loan.id !== id);
   await saveLoans(updated);
   return updated;
@@ -53,21 +188,13 @@ export async function deleteLoan(id) {
 
 export async function addPaymentToLoan(loanId, payment) {
   const loans = await getLoans();
-  const updated = loans.map((loan) => {
-    if (loan.id !== loanId) return loan;
+  const targetLoan = loans.find((loan) => loan.id === loanId);
+  if (!targetLoan) return loans;
 
-    const payments = [...loan.payments, payment];
-    const totalPaid = payments.reduce((sum, item) => sum + Number(item.amount || 0), 0);
-    const amount = Number(loan.amount || 0);
-    const isPaid = totalPaid >= amount;
+  const payments = [...targetLoan.payments, payment];
+  const totalPaid = payments.reduce((sum, item) => sum + Number(item.amount || 0), 0);
+  const amount = Number(targetLoan.amount || 0);
+  const isPaid = totalPaid >= amount;
 
-    return {
-      ...loan,
-      payments,
-      isPaid
-    };
-  });
-
-  await saveLoans(updated);
-  return updated;
+  return updateLoan(loanId, { payments, isPaid });
 }
