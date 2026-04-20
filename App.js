@@ -4,6 +4,7 @@ import { StatusBar } from "expo-status-bar";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import AppNavigator from "./src/navigation/AppNavigator";
 import { setupNotifications } from "./src/utils/notification";
+import { LanguageProvider } from "./src/context/LanguageContext";
 
 export default function App() {
   useEffect(() => {
@@ -13,7 +14,9 @@ export default function App() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <StatusBar style="dark" />
-      <AppNavigator />
+      <LanguageProvider>
+        <AppNavigator />
+      </LanguageProvider>
     </GestureHandlerRootView>
   );
 }

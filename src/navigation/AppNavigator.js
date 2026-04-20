@@ -1,6 +1,7 @@
 import React from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { ActivityIndicator, View, StyleSheet } from "react-native";
 import HomeScreen from "../screens/HomeScreen";
 import AddLoanScreen from "../screens/AddLoanScreen";
 import DetailScreen from "../screens/DetailScreen";
@@ -8,49 +9,75 @@ import EditLoanScreen from "../screens/EditLoanScreen";
 import AddPaymentScreen from "../screens/AddPaymentScreen";
 import DashboardScreen from "../screens/DashboardScreen";
 import BorrowersScreen from "../screens/BorrowersScreen";
+import LanguageSelectScreen from "../screens/LanguageSelectScreen";
+import { useLanguage } from "../context/LanguageContext";
 
 const Stack = createNativeStackNavigator();
 
 export default function AppNavigator() {
+  const { hasSelectedLanguage, isLanguageReady, t } = useLanguage();
+
+  if (!isLanguageReady) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#2563eb" />
+      </View>
+    );
+  }
+
   return (
     <NavigationContainer>
-      <Stack.Navigator>
+      <Stack.Navigator initialRouteName={hasSelectedLanguage ? "Home" : "LanguageSelect"}>
+        <Stack.Screen
+          name="LanguageSelect"
+          component={LanguageSelectScreen}
+          options={{ headerShown: false }}
+        />
         <Stack.Screen
           name="Home"
           component={HomeScreen}
-          options={{ title: "Udhaar Tracker" }}
+          options={{ title: t("screen.home") }}
         />
         <Stack.Screen
           name="AddLoan"
           component={AddLoanScreen}
-          options={{ title: "Add Loan" }}
+          options={{ title: t("screen.addLoan") }}
         />
         <Stack.Screen
           name="Detail"
           component={DetailScreen}
-          options={{ title: "Loan Detail" }}
+          options={{ title: t("screen.detail") }}
         />
         <Stack.Screen
           name="EditLoan"
           component={EditLoanScreen}
-          options={{ title: "Edit Loan" }}
+          options={{ title: t("screen.editLoan") }}
         />
         <Stack.Screen
           name="AddPayment"
           component={AddPaymentScreen}
-          options={{ title: "Add Payment" }}
+          options={{ title: t("screen.addPayment") }}
         />
         <Stack.Screen
           name="Dashboard"
           component={DashboardScreen}
-          options={{ title: "Dashboard" }}
+          options={{ title: t("screen.dashboard") }}
         />
         <Stack.Screen
           name="Borrowers"
           component={BorrowersScreen}
-          options={{ title: "Borrowers" }}
+          options={{ title: t("screen.borrowers") }}
         />
       </Stack.Navigator>
     </NavigationContainer>
   );
 }
+
+const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#f3f4f6"
+  }
+});

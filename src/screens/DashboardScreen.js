@@ -25,6 +25,36 @@ function StatCard({ label, value, tint }) {
   );
 }
 
+function formatCurrency(value) {
+  return `Rs. ${Math.round(Number(value || 0))}`;
+}
+
+function buildTopBorrowers(loans) {
+  const groups = new Map();
+
+  loans.forEach((loan) => {
+    const key = String(loan.name || "").trim().toLowerCase();
+    if (!key) return;
+
+    if (!groups.has(key)) {
+      groups.set(key, {
+        key,
+        name: String(loan.name || "").trim(),
+        pending: 0,
+        overdue: 0,
+        totalLoans: 0
+      });
+    }
+
+    const bucket = groups.get(key);
+    bucket.pending += getRemainingAmount(loan);
+    bucket.overdue += isLoanOverdue(loan) ? 1 : 0;
+    bucket.totalLoans += 1;
+  });
+
+  return Array.from(groups.values()).sort((a, b) => b.pending - a.pending).slice(0, 5);
+}
+
 export default function DashboardScreen() {
   const [stats, setStats] = useState({
     totalLent: 0,
@@ -32,7 +62,12 @@ export default function DashboardScreen() {
     totalPending: 0,
     overdueCount: 0,
     monthLent: 0,
-    monthRecovered: 0
+    monthRecovered: 0,
+    activeLoanCount: 0,
+    partialLoanCount: 0,
+    paidLoanCount: 0,
+    monthlyPaymentCount: 0,
+    topBorrowers: []
   });
 
   useFocusEffect(
@@ -56,6 +91,18 @@ export default function DashboardScreen() {
             sum + currentMonthPayments.reduce((acc, payment) => acc + Number(payment.amount || 0), 0)
           );
         }, 0);
+        const activeLoanCount = loans.filter((loan) => getRemainingAmount(loan) > 0).length;
+        const paidLoanCount = loans.filter((loan) => getRemainingAmount(loan) <= 0).length;
+        const partialLoanCount = loans.filter((loan) => {
+          const paid = getTotalPaid(loan);
+          const remaining = getRemainingAmount(loan);
+          return paid > 0 && remaining > 0;
+        }).length;
+        const monthlyPaymentCount = loans.reduce((sum, loan) => {
+          if (!Array.isArray(loan.payments)) return sum;
+          return sum + loan.payments.filter((payment) => isInCurrentMonth(payment.createdAt)).length;
+        }, 0);
+        const topBorrowers = buildTopBorrowers(loans);
 
         setStats({
           totalLent,
@@ -63,7 +110,12 @@ export default function DashboardScreen() {
           totalPending,
           overdueCount,
           monthLent,
-          monthRecovered
+          monthRecovered,
+          activeLoanCount,
+          partialLoanCount,
+          paidLoanCount,
+          monthlyPaymentCount,
+          topBorrowers
         });
       };
 
@@ -71,24 +123,79 @@ export default function DashboardScreen() {
     }, [])
   );
 
+  const recoveryRate =
+    stats.totalLent > 0 ? Math.min(100, Math.round((stats.totalRecovered / stats.totalLent) * 100)) : 0;
+  const monthlyNet = stats.monthRecovered - stats.monthLent;
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
+      <View style={styles.heroCard}>
+        <Text style={styles.heroTitle}>Collection Health</Text>
+        <Text style={styles.heroValue}>{recoveryRate}% recovered</Text>
+        <View style={styles.progressTrack}>
+          <View style={[styles.progressFill, { width: `${recoveryRate}%` }]} />
+        </View>
+        <Text style={styles.heroSubtext}>
+          {formatCurrency(stats.totalRecovered)} recovered out of {formatCurrency(stats.totalLent)}
+        </Text>
+      </View>
+
       <Text style={styles.sectionTitle}>Overall</Text>
       <View style={styles.grid}>
-        <StatCard label="Total Lent" value={`Rs. ${stats.totalLent}`} tint={styles.blue} />
-        <StatCard label="Total Recovered" value={`Rs. ${stats.totalRecovered}`} tint={styles.green} />
-        <StatCard label="Total Pending" value={`Rs. ${stats.totalPending}`} tint={styles.red} />
+        <StatCard label="Total Lent" value={formatCurrency(stats.totalLent)} tint={styles.blue} />
+        <StatCard
+          label="Total Recovered"
+          value={formatCurrency(stats.totalRecovered)}
+          tint={styles.green}
+        />
+        <StatCard label="Total Pending" value={formatCurrency(stats.totalPending)} tint={styles.red} />
         <StatCard label="Overdue Loans" value={String(stats.overdueCount)} tint={styles.orange} />
+      </View>
+
+      <Text style={styles.sectionTitle}>Portfolio Mix</Text>
+      <View style={styles.grid}>
+        <StatCard label="Active Loans" value={String(stats.activeLoanCount)} tint={styles.sky} />
+        <StatCard label="Partially Paid" value={String(stats.partialLoanCount)} tint={styles.yellow} />
+        <StatCard label="Fully Paid" value={String(stats.paidLoanCount)} tint={styles.mint} />
       </View>
 
       <Text style={styles.sectionTitle}>This Month</Text>
       <View style={styles.grid}>
-        <StatCard label="Lent This Month" value={`Rs. ${stats.monthLent}`} tint={styles.purple} />
+        <StatCard label="Lent This Month" value={formatCurrency(stats.monthLent)} tint={styles.purple} />
         <StatCard
           label="Recovered This Month"
-          value={`Rs. ${stats.monthRecovered}`}
+          value={formatCurrency(stats.monthRecovered)}
           tint={styles.teal}
         />
+        <StatCard
+          label="Monthly Net"
+          value={`${monthlyNet >= 0 ? "+" : "-"}${formatCurrency(Math.abs(monthlyNet))}`}
+          tint={monthlyNet >= 0 ? styles.mint : styles.lightRed}
+        />
+        <StatCard
+          label="Payments Logged"
+          value={String(stats.monthlyPaymentCount)}
+          tint={styles.peach}
+        />
+      </View>
+
+      <Text style={styles.sectionTitle}>Top Borrowers by Pending</Text>
+      <View style={styles.listCard}>
+        {stats.topBorrowers.length === 0 ? (
+          <Text style={styles.emptyText}>No borrower data yet.</Text>
+        ) : (
+          stats.topBorrowers.map((borrower) => (
+            <View key={borrower.key} style={styles.borrowerRow}>
+              <View>
+                <Text style={styles.borrowerName}>{borrower.name}</Text>
+                <Text style={styles.borrowerMeta}>
+                  Loans: {borrower.totalLoans} | Overdue: {borrower.overdue}
+                </Text>
+              </View>
+              <Text style={styles.borrowerPending}>{formatCurrency(borrower.pending)}</Text>
+            </View>
+          ))
+        )}
       </View>
     </ScrollView>
   );
@@ -98,6 +205,37 @@ const styles = StyleSheet.create({
   container: {
     padding: 16,
     backgroundColor: "#f3f4f6"
+  },
+  heroCard: {
+    backgroundColor: "#111827",
+    borderRadius: 14,
+    padding: 14,
+    marginBottom: 10
+  },
+  heroTitle: {
+    color: "#d1d5db",
+    fontWeight: "600"
+  },
+  heroValue: {
+    color: "#fff",
+    fontWeight: "700",
+    fontSize: 24,
+    marginTop: 2
+  },
+  heroSubtext: {
+    color: "#9ca3af",
+    marginTop: 8
+  },
+  progressTrack: {
+    marginTop: 10,
+    height: 10,
+    borderRadius: 999,
+    backgroundColor: "#374151",
+    overflow: "hidden"
+  },
+  progressFill: {
+    height: "100%",
+    backgroundColor: "#22c55e"
   },
   sectionTitle: {
     fontSize: 18,
@@ -128,10 +266,45 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     fontSize: 18
   },
+  listCard: {
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 10
+  },
+  borrowerRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f3f4f6"
+  },
+  borrowerName: {
+    color: "#111827",
+    fontWeight: "700"
+  },
+  borrowerMeta: {
+    color: "#6b7280",
+    marginTop: 2,
+    fontSize: 12
+  },
+  borrowerPending: {
+    color: "#b91c1c",
+    fontWeight: "700"
+  },
+  emptyText: {
+    color: "#6b7280"
+  },
   blue: { backgroundColor: "#dbeafe" },
   green: { backgroundColor: "#dcfce7" },
   red: { backgroundColor: "#fee2e2" },
   orange: { backgroundColor: "#ffedd5" },
   purple: { backgroundColor: "#ede9fe" },
-  teal: { backgroundColor: "#ccfbf1" }
+  teal: { backgroundColor: "#ccfbf1" },
+  sky: { backgroundColor: "#e0f2fe" },
+  yellow: { backgroundColor: "#fef9c3" },
+  mint: { backgroundColor: "#d1fae5" },
+  peach: { backgroundColor: "#ffedd5" },
+  lightRed: { backgroundColor: "#fee2e2" }
 });
