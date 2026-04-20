@@ -21,8 +21,10 @@ import {
   getTotalPaid,
   isLoanOverdue
 } from "../utils/loanMath";
+import { useLanguage } from "../context/LanguageContext";
 
 export default function HomeScreen({ navigation }) {
+  const { t } = useLanguage();
   const [loans, setLoans] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState("ALL");
@@ -108,10 +110,10 @@ export default function HomeScreen({ navigation }) {
   };
 
   const handleDelete = async (loan) => {
-    Alert.alert("Delete Loan", `Delete ${loan.name}'s loan?`, [
-      { text: "Cancel", style: "cancel" },
+    Alert.alert(t("home.deleteTitle"), t("home.deleteMessage", { name: loan.name }), [
+      { text: t("home.cancel"), style: "cancel" },
       {
-        text: "Delete",
+        text: t("home.delete"),
         style: "destructive",
         onPress: async () => {
           await cancelLoanReminder(loan.notificationId);
@@ -131,16 +133,16 @@ export default function HomeScreen({ navigation }) {
     <View style={styles.container}>
       <View style={styles.summaryRow}>
         <View style={[styles.statCard, styles.givenCard]}>
-          <Text style={styles.statLabel}>Total Given</Text>
+          <Text style={styles.statLabel}>{t("home.totalGiven")}</Text>
           <Text style={styles.statValue}>Rs. {totalGiven}</Text>
         </View>
         <View style={[styles.statCard, styles.pendingCard]}>
-          <Text style={styles.statLabel}>Total Pending</Text>
+          <Text style={styles.statLabel}>{t("home.totalPending")}</Text>
           <Text style={styles.statValue}>Rs. {totalPending}</Text>
         </View>
       </View>
       <View style={styles.recoveredBox}>
-        <Text style={styles.recoveredText}>Recovered: Rs. {totalRecovered}</Text>
+        <Text style={styles.recoveredText}>{t("home.recovered", { amount: `Rs. ${totalRecovered}` })}</Text>
       </View>
 
       <View style={styles.quickActionsRow}>
@@ -150,7 +152,9 @@ export default function HomeScreen({ navigation }) {
             style={styles.quickActionBtn}
             onPress={() => navigation.navigate(action.key)}
           >
-            <Text style={styles.quickActionText}>{action.label}</Text>
+            <Text style={styles.quickActionText}>
+              {action.key === "Dashboard" ? t("home.dashboard") : t("home.borrowers")}
+            </Text>
           </TouchableOpacity>
         ))}
       </View>
@@ -159,22 +163,22 @@ export default function HomeScreen({ navigation }) {
         style={styles.addBtn}
         onPress={() => navigation.navigate("AddLoan")}
       >
-        <Text style={styles.addBtnText}>+ Add Loan</Text>
+        <Text style={styles.addBtnText}>{t("home.addLoan")}</Text>
       </TouchableOpacity>
 
       <TextInput
         value={searchQuery}
         onChangeText={setSearchQuery}
-        placeholder="Search by name, note, amount"
+        placeholder={t("home.searchPlaceholder")}
         style={styles.searchInput}
       />
 
       <View style={styles.filtersRow}>
         {[
-          { key: "ALL", label: "All" },
-          { key: "UNPAID", label: "Unpaid" },
-          { key: "PAID", label: "Paid" },
-          { key: "OVERDUE", label: "Overdue" }
+          { key: "ALL", label: t("home.filter.all") },
+          { key: "UNPAID", label: t("home.filter.unpaid") },
+          { key: "PAID", label: t("home.filter.paid") },
+          { key: "OVERDUE", label: t("home.filter.overdue") }
         ].map((filter) => {
           const isActive = activeFilter === filter.key;
           return (
@@ -192,12 +196,12 @@ export default function HomeScreen({ navigation }) {
       </View>
 
       <View style={styles.sortRow}>
-        <Text style={styles.sortLabel}>Sort:</Text>
+        <Text style={styles.sortLabel}>{t("home.sort")}</Text>
         {[
-          { key: "NEWEST", label: "Newest" },
-          { key: "OLDEST", label: "Oldest" },
-          { key: "HIGHEST_AMOUNT", label: "Highest" },
-          { key: "OVERDUE_FIRST", label: "Overdue" }
+          { key: "NEWEST", label: t("home.sort.newest") },
+          { key: "OLDEST", label: t("home.sort.oldest") },
+          { key: "HIGHEST_AMOUNT", label: t("home.sort.highest") },
+          { key: "OVERDUE_FIRST", label: t("home.sort.overdue") }
         ].map((option) => {
           const isActive = sortBy === option.key;
           return (
@@ -236,8 +240,8 @@ export default function HomeScreen({ navigation }) {
           <View style={styles.emptyBox}>
             <Text style={styles.emptyText}>
               {loans.length === 0
-                ? "No loans yet. Add your first udhaar."
-                : "No loans match your search/filter."}
+                ? t("home.empty.noLoans")
+                : t("home.empty.noMatch")}
             </Text>
           </View>
         }

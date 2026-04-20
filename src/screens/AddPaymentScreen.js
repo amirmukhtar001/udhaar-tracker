@@ -14,8 +14,10 @@ import {
 } from "../storage/loanStorage";
 import { cancelLoanReminder } from "../utils/notification";
 import { getRemainingAmount, getTotalPaid } from "../utils/loanMath";
+import { useLanguage } from "../context/LanguageContext";
 
 export default function AddPaymentScreen({ route, navigation }) {
+  const { t } = useLanguage();
   const { loanId } = route.params;
   const [loan, setLoan] = useState(null);
   const [amount, setAmount] = useState("");
@@ -35,13 +37,16 @@ export default function AddPaymentScreen({ route, navigation }) {
 
     const numericAmount = Number(amount);
     if (!numericAmount || numericAmount <= 0) {
-      Alert.alert("Validation", "Payment amount must be greater than 0.");
+      Alert.alert(t("common.validation"), t("addPayment.validation.amount"));
       return;
     }
 
     const remaining = getRemainingAmount(loan);
     if (numericAmount > remaining) {
-      Alert.alert("Validation", `Payment cannot exceed remaining amount (Rs. ${remaining}).`);
+      Alert.alert(
+        t("common.validation"),
+        t("addPayment.validation.maxAmount", { amount: `Rs. ${remaining}` })
+      );
       return;
     }
 
@@ -66,7 +71,7 @@ export default function AddPaymentScreen({ route, navigation }) {
   if (!loan) {
     return (
       <View style={styles.container}>
-        <Text style={styles.infoText}>Loan not found.</Text>
+        <Text style={styles.infoText}>{t("addPayment.notFound")}</Text>
       </View>
     );
   }
@@ -77,31 +82,33 @@ export default function AddPaymentScreen({ route, navigation }) {
   return (
     <View style={styles.container}>
       <View style={styles.summaryCard}>
-        <Text style={styles.summaryText}>Borrower: {loan.name}</Text>
-        <Text style={styles.summaryText}>Total: Rs. {loan.amount}</Text>
-        <Text style={styles.summaryText}>Paid: Rs. {totalPaid}</Text>
-        <Text style={styles.remainingText}>Remaining: Rs. {remaining}</Text>
+        <Text style={styles.summaryText}>{t("addPayment.borrower", { name: loan.name })}</Text>
+        <Text style={styles.summaryText}>{t("addPayment.total", { amount: `Rs. ${loan.amount}` })}</Text>
+        <Text style={styles.summaryText}>{t("addPayment.paid", { amount: `Rs. ${totalPaid}` })}</Text>
+        <Text style={styles.remainingText}>
+          {t("addPayment.remaining", { amount: `Rs. ${remaining}` })}
+        </Text>
       </View>
 
-      <Text style={styles.label}>Payment Amount *</Text>
+      <Text style={styles.label}>{t("addPayment.amount")}</Text>
       <TextInput
         value={amount}
         onChangeText={setAmount}
-        placeholder="e.g. 1000"
+        placeholder={t("addPayment.placeholder.amount")}
         keyboardType="numeric"
         style={styles.input}
       />
 
-      <Text style={styles.label}>Payment Note (optional)</Text>
+      <Text style={styles.label}>{t("addPayment.note")}</Text>
       <TextInput
         value={note}
         onChangeText={setNote}
-        placeholder="Cash, bank transfer, etc."
+        placeholder={t("addPayment.placeholder.note")}
         style={styles.input}
       />
 
       <TouchableOpacity style={styles.saveBtn} onPress={handleSavePayment}>
-        <Text style={styles.saveBtnText}>Save Payment</Text>
+        <Text style={styles.saveBtnText}>{t("addPayment.save")}</Text>
       </TouchableOpacity>
     </View>
   );

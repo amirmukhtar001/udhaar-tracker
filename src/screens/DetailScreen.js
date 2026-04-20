@@ -7,6 +7,7 @@ import {
   scheduleLoanReminder
 } from "../utils/notification";
 import { getLoanStatus, getRemainingAmount, getTotalPaid } from "../utils/loanMath";
+import { useLanguage } from "../context/LanguageContext";
 
 function row(label, value) {
   return (
@@ -33,7 +34,14 @@ function formatShortTime(dateInput) {
   return `${hh}:${mm}`;
 }
 
+function translateRepeatValue(value, t) {
+  if (value === "DAILY") return t("common.daily");
+  if (value === "WEEKLY") return t("common.weekly");
+  return t("common.oneTime");
+}
+
 export default function DetailScreen({ route, navigation }) {
+  const { t } = useLanguage();
   const { loanId } = route.params;
   const [loan, setLoan] = useState(null);
 
@@ -67,10 +75,10 @@ export default function DetailScreen({ route, navigation }) {
   const onDelete = () => {
     if (!loan) return;
 
-    Alert.alert("Delete Loan", `Delete ${loan.name}'s loan?`, [
-      { text: "Cancel", style: "cancel" },
+    Alert.alert(t("detail.deleteTitle"), t("detail.deleteMessage", { name: loan.name }), [
+      { text: t("detail.cancel"), style: "cancel" },
       {
-        text: "Delete",
+        text: t("detail.delete"),
         style: "destructive",
         onPress: async () => {
           await cancelLoanReminder(loan.notificationId);
@@ -84,7 +92,7 @@ export default function DetailScreen({ route, navigation }) {
   if (!loan) {
     return (
       <View style={styles.container}>
-        <Text style={styles.notFound}>Loan not found.</Text>
+        <Text style={styles.notFound}>{t("detail.notFound")}</Text>
       </View>
     );
   }
@@ -97,21 +105,30 @@ export default function DetailScreen({ route, navigation }) {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.card}>
-        {row("Name", loan.name)}
-        {row("Amount", `Rs. ${loan.amount}`)}
-        {row("Paid", `Rs. ${totalPaid}`)}
-        {row("Remaining", `Rs. ${remainingAmount}`)}
-        {row("Note", loan.note || "-")}
-        {row("Date", loan.date)}
-        {row("Reminder Date", formatShortDate(loan.reminderDate))}
-        {row("Reminder Time", formatShortTime(loan.reminderDate))}
-        {row("Reminder Repeat", loan.reminderRepeat || "NONE")}
-        {row("Status", statusText)}
+        {row(t("detail.row.name"), loan.name)}
+        {row(t("detail.row.amount"), `Rs. ${loan.amount}`)}
+        {row(t("detail.row.paid"), `Rs. ${totalPaid}`)}
+        {row(t("detail.row.remaining"), `Rs. ${remainingAmount}`)}
+        {row(t("detail.row.note"), loan.note || "-")}
+        {row(t("detail.row.date"), loan.date)}
+        {row(t("detail.row.reminderDate"), formatShortDate(loan.reminderDate))}
+        {row(t("detail.row.reminderTime"), formatShortTime(loan.reminderDate))}
+        {row(t("detail.row.reminderRepeat"), translateRepeatValue(loan.reminderRepeat, t))}
+        {row(
+          t("detail.row.status"),
+          statusText === "Paid"
+            ? t("loan.status.paid")
+            : statusText === "Partially Paid"
+            ? t("loan.status.partial")
+            : t("loan.status.unpaid")
+        )}
       </View>
 
       <TouchableOpacity style={styles.toggleBtn} onPress={toggleStatus}>
         <Text style={styles.btnText}>
-          Mark as {loan.isPaid ? "Unpaid" : "Paid"}
+          {t("detail.markAs", {
+            status: loan.isPaid ? t("loan.status.unpaid") : t("loan.status.paid")
+          })}
         </Text>
       </TouchableOpacity>
 
@@ -119,24 +136,24 @@ export default function DetailScreen({ route, navigation }) {
         style={styles.payBtn}
         onPress={() => navigation.navigate("AddPayment", { loanId: loan.id })}
       >
-        <Text style={styles.btnText}>Add Payment</Text>
+        <Text style={styles.btnText}>{t("detail.addPayment")}</Text>
       </TouchableOpacity>
 
       <TouchableOpacity
         style={styles.editBtn}
         onPress={() => navigation.navigate("EditLoan", { loanId: loan.id })}
       >
-        <Text style={styles.btnText}>Edit Loan</Text>
+        <Text style={styles.btnText}>{t("detail.editLoan")}</Text>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.deleteBtn} onPress={onDelete}>
-        <Text style={styles.btnText}>Delete Loan</Text>
+        <Text style={styles.btnText}>{t("detail.deleteLoan")}</Text>
       </TouchableOpacity>
 
       <View style={styles.historyCard}>
-        <Text style={styles.historyTitle}>Payment History</Text>
+        <Text style={styles.historyTitle}>{t("detail.paymentHistory")}</Text>
         {payments.length === 0 ? (
-          <Text style={styles.historyEmpty}>No payments recorded yet.</Text>
+          <Text style={styles.historyEmpty}>{t("detail.noPayments")}</Text>
         ) : (
           payments.map((payment) => (
             <View key={payment.id} style={styles.paymentRow}>

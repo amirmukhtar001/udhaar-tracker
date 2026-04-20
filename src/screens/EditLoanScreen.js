@@ -15,20 +15,21 @@ import {
   scheduleLoanReminder
 } from "../utils/notification";
 import { getTotalPaid } from "../utils/loanMath";
+import { useLanguage } from "../context/LanguageContext";
 
 const REPEAT_OPTIONS = [
-  { key: "NONE", label: "One-time" },
-  { key: "DAILY", label: "Daily" },
-  { key: "WEEKLY", label: "Weekly" }
+  { key: "NONE", labelKey: "common.oneTime" },
+  { key: "DAILY", labelKey: "common.daily" },
+  { key: "WEEKLY", labelKey: "common.weekly" }
 ];
 
 function formatDatePart(date) {
-  if (!date) return "Not set";
+  if (!date) return null;
   return date.toISOString().split("T")[0];
 }
 
 function formatTimePart(date) {
-  if (!date) return "Not set";
+  if (!date) return null;
   const hh = String(date.getHours()).padStart(2, "0");
   const mm = String(date.getMinutes()).padStart(2, "0");
   return `${hh}:${mm}`;
@@ -41,6 +42,7 @@ function parseDate(input) {
 }
 
 export default function EditLoanScreen({ route, navigation }) {
+  const { language, t } = useLanguage();
   const { loanId } = route.params;
   const [loan, setLoan] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -110,15 +112,15 @@ export default function EditLoanScreen({ route, navigation }) {
     const numericAmount = Number(amount);
 
     if (!cleanName) {
-      Alert.alert("Validation", "Name is required.");
+      Alert.alert(t("common.validation"), t("addLoan.validation.name"));
       return;
     }
     if (!numericAmount || numericAmount <= 0) {
-      Alert.alert("Validation", "Amount must be greater than 0.");
+      Alert.alert(t("common.validation"), t("addLoan.validation.amount"));
       return;
     }
     if (reminderDate && reminderRepeat === "NONE" && reminderDate <= new Date()) {
-      Alert.alert("Validation", "Reminder date/time must be in the future for one-time reminders.");
+      Alert.alert(t("common.validation"), t("addLoan.validation.reminderFuture"));
       return;
     }
 
@@ -150,20 +152,21 @@ export default function EditLoanScreen({ route, navigation }) {
         note: note.trim(),
         reminderDate: nextReminderDate,
         reminderRepeat: nextReminderRepeat,
+        language,
         notificationId,
         isPaid: getTotalPaid(loan) >= numericAmount
       });
 
       navigation.goBack();
     } catch (error) {
-      Alert.alert("Error", "Unable to update loan. Please try again.");
+      Alert.alert(t("common.error"), t("editLoan.error"));
     }
   };
 
   if (loading) {
     return (
       <View style={styles.container}>
-        <Text style={styles.infoText}>Loading...</Text>
+        <Text style={styles.infoText}>{t("common.loading")}</Text>
       </View>
     );
   }
@@ -171,47 +174,51 @@ export default function EditLoanScreen({ route, navigation }) {
   if (!loan) {
     return (
       <View style={styles.container}>
-        <Text style={styles.infoText}>Loan not found.</Text>
+        <Text style={styles.infoText}>{t("editLoan.notFound")}</Text>
       </View>
     );
   }
 
   return (
     <View style={styles.container}>
-      <Text style={styles.label}>Name *</Text>
+      <Text style={styles.label}>{t("addLoan.name")}</Text>
       <TextInput
         value={name}
         onChangeText={setName}
-        placeholder="e.g. Ali"
+        placeholder={t("addLoan.placeholder.name")}
         style={styles.input}
       />
 
-      <Text style={styles.label}>Amount *</Text>
+      <Text style={styles.label}>{t("addLoan.amount")}</Text>
       <TextInput
         value={amount}
         onChangeText={setAmount}
-        placeholder="e.g. 5000"
+        placeholder={t("addLoan.placeholder.amount")}
         keyboardType="numeric"
         style={styles.input}
       />
 
-      <Text style={styles.label}>Note (optional)</Text>
+      <Text style={styles.label}>{t("addLoan.note")}</Text>
       <TextInput
         value={note}
         onChangeText={setNote}
-        placeholder="Dinner, rent, etc."
+        placeholder={t("addLoan.placeholder.note")}
         style={styles.input}
       />
 
-      <Text style={styles.label}>Reminder Date & Time (optional)</Text>
+      <Text style={styles.label}>{t("addLoan.reminderDateTime")}</Text>
       <TouchableOpacity style={styles.dateBtn} onPress={() => setShowDatePicker(true)}>
-        <Text style={styles.dateBtnText}>Date: {formatDatePart(reminderDate)}</Text>
+        <Text style={styles.dateBtnText}>
+          {t("common.date")}: {formatDatePart(reminderDate) || t("common.notSet")}
+        </Text>
       </TouchableOpacity>
       <TouchableOpacity style={styles.dateBtn} onPress={() => setShowTimePicker(true)}>
-        <Text style={styles.dateBtnText}>Time: {formatTimePart(reminderDate)}</Text>
+        <Text style={styles.dateBtnText}>
+          {t("common.time")}: {formatTimePart(reminderDate) || t("common.notSet")}
+        </Text>
       </TouchableOpacity>
 
-      <Text style={styles.label}>Repeat</Text>
+      <Text style={styles.label}>{t("common.repeat")}</Text>
       <View style={styles.repeatRow}>
         {REPEAT_OPTIONS.map((option) => {
           const isActive = reminderRepeat === option.key;
@@ -222,7 +229,7 @@ export default function EditLoanScreen({ route, navigation }) {
               onPress={() => setReminderRepeat(option.key)}
             >
               <Text style={[styles.repeatChipText, isActive ? styles.repeatChipTextActive : null]}>
-                {option.label}
+                {t(option.labelKey)}
               </Text>
             </TouchableOpacity>
           );
@@ -231,7 +238,7 @@ export default function EditLoanScreen({ route, navigation }) {
 
       {reminderDate ? (
         <TouchableOpacity style={styles.clearBtn} onPress={clearReminder}>
-          <Text style={styles.clearBtnText}>Clear Reminder</Text>
+          <Text style={styles.clearBtnText}>{t("common.clearReminder")}</Text>
         </TouchableOpacity>
       ) : null}
 
@@ -255,7 +262,7 @@ export default function EditLoanScreen({ route, navigation }) {
       )}
 
       <TouchableOpacity style={styles.saveBtn} onPress={handleSave}>
-        <Text style={styles.saveBtnText}>Save Changes</Text>
+        <Text style={styles.saveBtnText}>{t("editLoan.save")}</Text>
       </TouchableOpacity>
     </View>
   );

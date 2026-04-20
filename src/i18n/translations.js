@@ -1,4 +1,4 @@
-export const DEFAULT_LANGUAGE = "english";
+export const DEFAULT_LANGUAGE = "roman_urdu";
 
 export const SUPPORTED_LANGUAGES = ["roman_urdu", "urdu", "english", "sindhi", "arabic"];
 

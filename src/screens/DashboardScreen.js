@@ -7,6 +7,7 @@ import {
   getTotalPaid,
   isLoanOverdue
 } from "../utils/loanMath";
+import { useLanguage } from "../context/LanguageContext";
 
 function isInCurrentMonth(dateValue) {
   if (!dateValue) return false;
@@ -56,6 +57,7 @@ function buildTopBorrowers(loans) {
 }
 
 export default function DashboardScreen() {
+  const { t } = useLanguage();
   const [stats, setStats] = useState({
     totalLent: 0,
     totalRecovered: 0,
@@ -130,66 +132,72 @@ export default function DashboardScreen() {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.heroCard}>
-        <Text style={styles.heroTitle}>Collection Health</Text>
-        <Text style={styles.heroValue}>{recoveryRate}% recovered</Text>
+        <Text style={styles.heroTitle}>{t("dashboard.collectionHealth")}</Text>
+        <Text style={styles.heroValue}>{t("dashboard.recoveredPercent", { percent: recoveryRate })}</Text>
         <View style={styles.progressTrack}>
           <View style={[styles.progressFill, { width: `${recoveryRate}%` }]} />
         </View>
         <Text style={styles.heroSubtext}>
-          {formatCurrency(stats.totalRecovered)} recovered out of {formatCurrency(stats.totalLent)}
+          {t("dashboard.recoveredOutOf", {
+            recovered: formatCurrency(stats.totalRecovered),
+            lent: formatCurrency(stats.totalLent)
+          })}
         </Text>
       </View>
 
-      <Text style={styles.sectionTitle}>Overall</Text>
+      <Text style={styles.sectionTitle}>{t("dashboard.section.overall")}</Text>
       <View style={styles.grid}>
-        <StatCard label="Total Lent" value={formatCurrency(stats.totalLent)} tint={styles.blue} />
+        <StatCard label={t("dashboard.totalLent")} value={formatCurrency(stats.totalLent)} tint={styles.blue} />
         <StatCard
-          label="Total Recovered"
+          label={t("dashboard.totalRecovered")}
           value={formatCurrency(stats.totalRecovered)}
           tint={styles.green}
         />
-        <StatCard label="Total Pending" value={formatCurrency(stats.totalPending)} tint={styles.red} />
-        <StatCard label="Overdue Loans" value={String(stats.overdueCount)} tint={styles.orange} />
+        <StatCard label={t("dashboard.totalPending")} value={formatCurrency(stats.totalPending)} tint={styles.red} />
+        <StatCard label={t("dashboard.overdueLoans")} value={String(stats.overdueCount)} tint={styles.orange} />
       </View>
 
-      <Text style={styles.sectionTitle}>Portfolio Mix</Text>
+      <Text style={styles.sectionTitle}>{t("dashboard.section.portfolio")}</Text>
       <View style={styles.grid}>
-        <StatCard label="Active Loans" value={String(stats.activeLoanCount)} tint={styles.sky} />
-        <StatCard label="Partially Paid" value={String(stats.partialLoanCount)} tint={styles.yellow} />
-        <StatCard label="Fully Paid" value={String(stats.paidLoanCount)} tint={styles.mint} />
+        <StatCard label={t("dashboard.activeLoans")} value={String(stats.activeLoanCount)} tint={styles.sky} />
+        <StatCard label={t("dashboard.partialLoans")} value={String(stats.partialLoanCount)} tint={styles.yellow} />
+        <StatCard label={t("dashboard.paidLoans")} value={String(stats.paidLoanCount)} tint={styles.mint} />
       </View>
 
-      <Text style={styles.sectionTitle}>This Month</Text>
+      <Text style={styles.sectionTitle}>{t("dashboard.section.month")}</Text>
       <View style={styles.grid}>
-        <StatCard label="Lent This Month" value={formatCurrency(stats.monthLent)} tint={styles.purple} />
+        <StatCard label={t("dashboard.monthLent")} value={formatCurrency(stats.monthLent)} tint={styles.purple} />
         <StatCard
-          label="Recovered This Month"
+          label={t("dashboard.monthRecovered")}
           value={formatCurrency(stats.monthRecovered)}
           tint={styles.teal}
         />
         <StatCard
-          label="Monthly Net"
+          label={t("dashboard.monthNet")}
           value={`${monthlyNet >= 0 ? "+" : "-"}${formatCurrency(Math.abs(monthlyNet))}`}
           tint={monthlyNet >= 0 ? styles.mint : styles.lightRed}
         />
         <StatCard
-          label="Payments Logged"
+          label={t("dashboard.monthPayments")}
           value={String(stats.monthlyPaymentCount)}
           tint={styles.peach}
         />
       </View>
 
-      <Text style={styles.sectionTitle}>Top Borrowers by Pending</Text>
+      <Text style={styles.sectionTitle}>{t("dashboard.section.topBorrowers")}</Text>
       <View style={styles.listCard}>
         {stats.topBorrowers.length === 0 ? (
-          <Text style={styles.emptyText}>No borrower data yet.</Text>
+          <Text style={styles.emptyText}>{t("dashboard.topBorrowersEmpty")}</Text>
         ) : (
           stats.topBorrowers.map((borrower) => (
             <View key={borrower.key} style={styles.borrowerRow}>
               <View>
                 <Text style={styles.borrowerName}>{borrower.name}</Text>
                 <Text style={styles.borrowerMeta}>
-                  Loans: {borrower.totalLoans} | Overdue: {borrower.overdue}
+                  {t("dashboard.borrowerMeta", {
+                    loans: borrower.totalLoans,
+                    overdue: borrower.overdue
+                  })}
                 </Text>
               </View>
               <Text style={styles.borrowerPending}>{formatCurrency(borrower.pending)}</Text>

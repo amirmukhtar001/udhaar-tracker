@@ -7,6 +7,7 @@ import {
   Pressable
 } from "react-native";
 import Swipeable from "react-native-gesture-handler/Swipeable";
+import { useLanguage } from "../context/LanguageContext";
 
 function ActionButton({ label, color, onPress }) {
   return (
@@ -34,16 +35,18 @@ export default function LoanItem({
   onTogglePaid,
   onDelete
 }) {
+  const { t } = useLanguage();
+
   const renderRightActions = () => (
     <View style={styles.actions}>
-      <ActionButton label="Pay" color="#2563eb" onPress={onAddPayment} />
-      <ActionButton label="Edit" color="#6b7280" onPress={onEdit} />
+      <ActionButton label={t("loan.action.pay")} color="#2563eb" onPress={onAddPayment} />
+      <ActionButton label={t("loan.action.edit")} color="#6b7280" onPress={onEdit} />
       <ActionButton
-        label={loan.isPaid ? "Unpaid" : "Paid"}
+        label={loan.isPaid ? t("loan.action.paidToggleUnpaid") : t("loan.action.paidTogglePaid")}
         color={loan.isPaid ? "#f59e0b" : "#22c55e"}
         onPress={onTogglePaid}
       />
-      <ActionButton label="Delete" color="#ef4444" onPress={onDelete} />
+      <ActionButton label={t("loan.action.delete")} color="#ef4444" onPress={onDelete} />
     </View>
   );
 
@@ -52,23 +55,27 @@ export default function LoanItem({
       <TouchableOpacity style={styles.card} activeOpacity={0.8} onPress={onPress}>
         <View>
           <Text style={styles.name}>{loan.name}</Text>
-          <Text style={styles.note}>{loan.note || "No note"}</Text>
+          <Text style={styles.note}>{loan.note || t("loan.noNote")}</Text>
           {isOverdue ? (
             <View style={styles.overdueBadge}>
-              <Text style={styles.overdueText}>Overdue by {overdueDays} day(s)</Text>
+              <Text style={styles.overdueText}>{t("loan.overdueByDays", { days: overdueDays })}</Text>
             </View>
           ) : null}
         </View>
         <View style={styles.right}>
           <Text style={styles.amount}>Rs. {loan.amount}</Text>
-          <Text style={styles.remaining}>Remaining: Rs. {remainingAmount}</Text>
+          <Text style={styles.remaining}>{t("loan.remaining", { amount: `Rs. ${remainingAmount}` })}</Text>
           <Text
             style={[
               styles.status,
               statusText === "Paid" ? styles.paid : statusText === "Partially Paid" ? styles.partial : styles.unpaid
             ]}
           >
-            {statusText}
+            {statusText === "Paid"
+              ? t("loan.status.paid")
+              : statusText === "Partially Paid"
+              ? t("loan.status.partial")
+              : t("loan.status.unpaid")}
           </Text>
         </View>
       </TouchableOpacity>

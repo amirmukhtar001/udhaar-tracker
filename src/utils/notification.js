@@ -1,6 +1,7 @@
 import { Platform } from "react-native";
 import * as Notifications from "expo-notifications";
 import { DEFAULT_LANGUAGE, translations } from "../i18n/translations";
+import { getSelectedLanguage } from "../storage/languageStorage";
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -54,7 +55,8 @@ export async function scheduleLoanReminder(loan) {
     };
   }
 
-  const language = loan?.language || DEFAULT_LANGUAGE;
+  const selectedLanguage = await getSelectedLanguage();
+  const language = selectedLanguage || loan?.language || DEFAULT_LANGUAGE;
   const languagePack = translations[language] || translations[DEFAULT_LANGUAGE];
   const title = languagePack["notification.title"] || "Udhaar Reminder";
   const bodyTemplate = languagePack["notification.body"] || "{name} owes you {amount}";

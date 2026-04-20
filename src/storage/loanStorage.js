@@ -1,3 +1,4 @@
+import { DEFAULT_LANGUAGE } from "../i18n/translations";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const LOANS_KEY = "loans";
@@ -6,7 +7,8 @@ function normalizeLoan(loan) {
   return {
     ...loan,
     payments: Array.isArray(loan.payments) ? loan.payments : [],
-    reminderRepeat: loan.reminderRepeat || "NONE"
+    reminderRepeat: loan.reminderRepeat || "NONE",
+    language: loan.language || DEFAULT_LANGUAGE
   };
 }
 

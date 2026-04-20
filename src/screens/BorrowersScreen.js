@@ -7,6 +7,7 @@ import {
   getTotalPaid,
   isLoanOverdue
 } from "../utils/loanMath";
+import { useLanguage } from "../context/LanguageContext";
 
 function groupByBorrower(loans) {
   const map = new Map();
@@ -39,20 +40,23 @@ function groupByBorrower(loans) {
   return Array.from(map.values()).sort((a, b) => b.totalPending - a.totalPending);
 }
 
-function BorrowerCard({ item }) {
+function BorrowerCard({ item, t }) {
   return (
     <View style={styles.card}>
       <Text style={styles.name}>{item.name}</Text>
-      <Text style={styles.meta}>Loans: {item.loanCount}</Text>
-      <Text style={styles.meta}>Total Lent: Rs. {item.totalLent}</Text>
-      <Text style={styles.meta}>Recovered: Rs. {item.totalPaid}</Text>
-      <Text style={styles.pending}>Pending: Rs. {item.totalPending}</Text>
-      {item.overdueCount > 0 ? <Text style={styles.overdue}>Overdue loans: {item.overdueCount}</Text> : null}
+      <Text style={styles.meta}>{t("borrowers.loans", { count: item.loanCount })}</Text>
+      <Text style={styles.meta}>{t("borrowers.totalLent", { amount: `Rs. ${item.totalLent}` })}</Text>
+      <Text style={styles.meta}>{t("borrowers.recovered", { amount: `Rs. ${item.totalPaid}` })}</Text>
+      <Text style={styles.pending}>{t("borrowers.pending", { amount: `Rs. ${item.totalPending}` })}</Text>
+      {item.overdueCount > 0 ? (
+        <Text style={styles.overdue}>{t("borrowers.overdueCount", { count: item.overdueCount })}</Text>
+      ) : null}
     </View>
   );
 }
 
 export default function BorrowersScreen() {
+  const { t } = useLanguage();
   const [borrowers, setBorrowers] = useState([]);
 
   useFocusEffect(
@@ -69,11 +73,11 @@ export default function BorrowersScreen() {
     <FlatList
       data={borrowers}
       keyExtractor={(item) => item.key}
-      renderItem={({ item }) => <BorrowerCard item={item} />}
+      renderItem={({ item }) => <BorrowerCard item={item} t={t} />}
       contentContainerStyle={styles.listContent}
       ListEmptyComponent={
         <View style={styles.emptyBox}>
-          <Text style={styles.emptyText}>No borrowers yet.</Text>
+          <Text style={styles.emptyText}>{t("borrowers.noData")}</Text>
         </View>
       }
     />

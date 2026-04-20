@@ -11,26 +11,28 @@ import {
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { addLoan } from "../storage/loanStorage";
 import { scheduleLoanReminder } from "../utils/notification";
+import { useLanguage } from "../context/LanguageContext";
 
 const REPEAT_OPTIONS = [
-  { key: "NONE", label: "One-time" },
-  { key: "DAILY", label: "Daily" },
-  { key: "WEEKLY", label: "Weekly" }
+  { key: "NONE", labelKey: "common.oneTime" },
+  { key: "DAILY", labelKey: "common.daily" },
+  { key: "WEEKLY", labelKey: "common.weekly" }
 ];
 
 function formatDatePart(date) {
-  if (!date) return "Not set";
+  if (!date) return null;
   return date.toISOString().split("T")[0];
 }
 
 function formatTimePart(date) {
-  if (!date) return "Not set";
+  if (!date) return null;
   const hh = String(date.getHours()).padStart(2, "0");
   const mm = String(date.getMinutes()).padStart(2, "0");
   return `${hh}:${mm}`;
 }
 
 export default function AddLoanScreen({ navigation }) {
+  const { language, t } = useLanguage();
   const [name, setName] = useState("");
   const [amount, setAmount] = useState("");
   const [note, setNote] = useState("");
@@ -75,15 +77,15 @@ export default function AddLoanScreen({ navigation }) {
     const numericAmount = Number(amount);
 
     if (!cleanName) {
-      Alert.alert("Validation", "Name is required.");
+      Alert.alert(t("common.validation"), t("addLoan.validation.name"));
       return;
     }
     if (!numericAmount || numericAmount <= 0) {
-      Alert.alert("Validation", "Amount must be greater than 0.");
+      Alert.alert(t("common.validation"), t("addLoan.validation.amount"));
       return;
     }
     if (reminderDate && reminderRepeat === "NONE" && reminderDate <= new Date()) {
-      Alert.alert("Validation", "Reminder date/time must be in the future for one-time reminders.");
+      Alert.alert(t("common.validation"), t("addLoan.validation.reminderFuture"));
       return;
     }
 
@@ -96,6 +98,7 @@ export default function AddLoanScreen({ navigation }) {
       date: new Date().toISOString().split("T")[0],
       reminderDate: reminderDate ? reminderDate.toISOString() : null,
       reminderRepeat,
+      language,
       isPaid: false,
       createdAt: new Date().toISOString(),
       notificationId: null
@@ -111,40 +114,44 @@ export default function AddLoanScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.label}>Name *</Text>
+      <Text style={styles.label}>{t("addLoan.name")}</Text>
       <TextInput
         value={name}
         onChangeText={setName}
-        placeholder="e.g. Ali"
+        placeholder={t("addLoan.placeholder.name")}
         style={styles.input}
       />
 
-      <Text style={styles.label}>Amount *</Text>
+      <Text style={styles.label}>{t("addLoan.amount")}</Text>
       <TextInput
         value={amount}
         onChangeText={setAmount}
-        placeholder="e.g. 5000"
+        placeholder={t("addLoan.placeholder.amount")}
         keyboardType="numeric"
         style={styles.input}
       />
 
-      <Text style={styles.label}>Note (optional)</Text>
+      <Text style={styles.label}>{t("addLoan.note")}</Text>
       <TextInput
         value={note}
         onChangeText={setNote}
-        placeholder="Dinner, rent, etc."
+        placeholder={t("addLoan.placeholder.note")}
         style={styles.input}
       />
 
-      <Text style={styles.label}>Reminder Date & Time (optional)</Text>
+      <Text style={styles.label}>{t("addLoan.reminderDateTime")}</Text>
       <TouchableOpacity style={styles.dateBtn} onPress={() => setShowDatePicker(true)}>
-        <Text style={styles.dateBtnText}>Date: {formatDatePart(reminderDate)}</Text>
+        <Text style={styles.dateBtnText}>
+          {t("common.date")}: {formatDatePart(reminderDate) || t("common.notSet")}
+        </Text>
       </TouchableOpacity>
       <TouchableOpacity style={styles.dateBtn} onPress={() => setShowTimePicker(true)}>
-        <Text style={styles.dateBtnText}>Time: {formatTimePart(reminderDate)}</Text>
+        <Text style={styles.dateBtnText}>
+          {t("common.time")}: {formatTimePart(reminderDate) || t("common.notSet")}
+        </Text>
       </TouchableOpacity>
 
-      <Text style={styles.label}>Repeat</Text>
+      <Text style={styles.label}>{t("common.repeat")}</Text>
       <View style={styles.repeatRow}>
         {REPEAT_OPTIONS.map((option) => {
           const isActive = reminderRepeat === option.key;
@@ -155,7 +162,7 @@ export default function AddLoanScreen({ navigation }) {
               onPress={() => setReminderRepeat(option.key)}
             >
               <Text style={[styles.repeatChipText, isActive ? styles.repeatChipTextActive : null]}>
-                {option.label}
+                {t(option.labelKey)}
               </Text>
             </TouchableOpacity>
           );
@@ -164,7 +171,7 @@ export default function AddLoanScreen({ navigation }) {
 
       {reminderDate ? (
         <TouchableOpacity style={styles.clearBtn} onPress={clearReminder}>
-          <Text style={styles.clearBtnText}>Clear Reminder</Text>
+          <Text style={styles.clearBtnText}>{t("common.clearReminder")}</Text>
         </TouchableOpacity>
       ) : null}
 
@@ -188,7 +195,7 @@ export default function AddLoanScreen({ navigation }) {
       )}
 
       <TouchableOpacity style={styles.saveBtn} onPress={handleSave}>
-        <Text style={styles.saveBtnText}>Save Loan</Text>
+        <Text style={styles.saveBtnText}>{t("addLoan.save")}</Text>
       </TouchableOpacity>
     </View>
   );
