@@ -22,13 +22,16 @@ import {
   isLoanOverdue
 } from "../utils/loanMath";
 import { useLanguage } from "../context/LanguageContext";
+import { useAuth } from "../context/AuthContext";
 
 export default function HomeScreen({ navigation }) {
   const { t } = useLanguage();
+  const { signOut } = useAuth();
   const [loans, setLoans] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState("ALL");
   const [sortBy, setSortBy] = useState("NEWEST");
+  const [isSigningOut, setIsSigningOut] = useState(false);
 
   const loadLoans = useCallback(async () => {
     const data = await getLoans();
@@ -129,8 +132,39 @@ export default function HomeScreen({ navigation }) {
     { key: "Borrowers", label: "Borrowers" }
   ];
 
+  const handleLogout = () => {
+    Alert.alert(t("auth.logoutTitle"), t("auth.logoutMessage"), [
+      { text: t("home.cancel"), style: "cancel" },
+      {
+        text: t("auth.logoutButton"),
+        style: "destructive",
+        onPress: async () => {
+          setIsSigningOut(true);
+          const { error } = await signOut();
+          setIsSigningOut(false);
+
+          if (error) {
+            Alert.alert(t("common.error"), error.message || t("auth.logoutError"));
+          }
+        }
+      }
+    ]);
+  };
+
   return (
     <View style={styles.container}>
+      <View style={styles.topBar}>
+        <TouchableOpacity
+          style={[styles.logoutBtn, isSigningOut ? styles.logoutBtnDisabled : null]}
+          onPress={handleLogout}
+          disabled={isSigningOut}
+        >
+          <Text style={styles.logoutBtnText}>
+            {isSigningOut ? t("common.loading") : t("auth.logoutButton")}
+          </Text>
+        </TouchableOpacity>
+      </View>
+
       <View style={styles.summaryRow}>
         <View style={[styles.statCard, styles.givenCard]}>
           <Text style={styles.statLabel}>{t("home.totalGiven")}</Text>
@@ -255,6 +289,27 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#f3f4f6",
     padding: 16
+  },
+  topBar: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    marginBottom: 8
+  },
+  logoutBtn: {
+    backgroundColor: "#fff",
+    borderWidth: 1,
+    borderColor: "#d1d5db",
+    borderRadius: 999,
+    paddingHorizontal: 12,
+    paddingVertical: 7
+  },
+  logoutBtnText: {
+    color: "#b91c1c",
+    fontWeight: "700",
+    fontSize: 12
+  },
+  logoutBtnDisabled: {
+    opacity: 0.6
   },
   summaryRow: {
     flexDirection: "row",
