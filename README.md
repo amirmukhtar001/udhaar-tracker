@@ -32,6 +32,20 @@ After changing env values, restart Metro:
 npx expo start -c
 ```
 
+## Phone OTP (Supabase Auth)
+
+This app includes a mobile-number sign-in screen using Supabase SMS OTP.
+
+Enable OTP in Supabase:
+
+1. Open Supabase Dashboard -> Authentication -> Providers.
+2. Enable Phone provider.
+3. Configure an SMS provider in Supabase Auth settings (Twilio/MessageBird/etc).
+4. Save settings.
+
+App flow:
+- Language select -> Phone number -> OTP verify -> Home
+
 ## Notes
 
 - Supabase integration is handled inside `src/storage/loanStorage.js`.

@@ -1,5 +1,6 @@
 create table if not exists public.loans (
   id text primary key,
+  user_id uuid references auth.users(id) on delete cascade,
   name text not null,
   amount numeric not null default 0,
   note text default '',
@@ -13,6 +14,14 @@ create table if not exists public.loans (
   notification_id text,
   language text not null default 'roman_urdu'
 );
+
+alter table public.loans
+  add column if not exists user_id uuid references auth.users(id) on delete cascade;
+
+alter table public.loans
+  alter column user_id set default auth.uid();
+
+create index if not exists idx_loans_user_id on public.loans(user_id);
 
 create or replace function public.set_updated_at()
 returns trigger as $$
@@ -31,30 +40,35 @@ execute function public.set_updated_at();
 alter table public.loans enable row level security;
 
 drop policy if exists "loans_select_all" on public.loans;
-create policy "loans_select_all"
+drop policy if exists "loans_insert_all" on public.loans;
+drop policy if exists "loans_update_all" on public.loans;
+drop policy if exists "loans_delete_all" on public.loans;
+
+drop policy if exists "loans_select_own" on public.loans;
+create policy "loans_select_own"
 on public.loans
 for select
-to anon, authenticated
-using (true);
+to authenticated
+using (user_id = auth.uid());
 
-drop policy if exists "loans_insert_all" on public.loans;
-create policy "loans_insert_all"
+drop policy if exists "loans_insert_own" on public.loans;
+create policy "loans_insert_own"
 on public.loans
 for insert
-to anon, authenticated
-with check (true);
+to authenticated
+with check (user_id = auth.uid());
 
-drop policy if exists "loans_update_all" on public.loans;
-create policy "loans_update_all"
+drop policy if exists "loans_update_own" on public.loans;
+create policy "loans_update_own"
 on public.loans
 for update
-to anon, authenticated
-using (true)
-with check (true);
+to authenticated
+using (user_id = auth.uid())
+with check (user_id = auth.uid());
 
-drop policy if exists "loans_delete_all" on public.loans;
-create policy "loans_delete_all"
+drop policy if exists "loans_delete_own" on public.loans;
+create policy "loans_delete_own"
 on public.loans
 for delete
-to anon, authenticated
-using (true);
+to authenticated
+using (user_id = auth.uid());

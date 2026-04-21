@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from "react-native";
 import { useLanguage } from "../context/LanguageContext";
+import { useAuth } from "../context/AuthContext";
 
 const LANGUAGE_OPTIONS = [
   { code: "roman_urdu", labelKey: "lang.roman_urdu" },
@@ -12,13 +13,14 @@ const LANGUAGE_OPTIONS = [
 
 export default function LanguageSelectScreen({ navigation }) {
   const { setLanguage, t } = useLanguage();
+  const { session } = useAuth();
   const [selectedLanguage, setSelectedLanguageCode] = useState("roman_urdu");
 
   const handleContinue = async () => {
     await setLanguage(selectedLanguage);
     navigation.reset({
       index: 0,
-      routes: [{ name: "Home" }]
+      routes: [{ name: session ? "Home" : "PhoneAuth" }]
     });
   };
 

@@ -11,13 +11,16 @@ import DashboardScreen from "../screens/DashboardScreen";
 import BorrowersScreen from "../screens/BorrowersScreen";
 import LanguageSelectScreen from "../screens/LanguageSelectScreen";
 import { useLanguage } from "../context/LanguageContext";
+import { useAuth } from "../context/AuthContext";
+import PhoneAuthScreen from "../screens/PhoneAuthScreen";
 
 const Stack = createNativeStackNavigator();
 
 export default function AppNavigator() {
   const { hasSelectedLanguage, isLanguageReady, t } = useLanguage();
+  const { session, isAuthReady } = useAuth();
 
-  if (!isLanguageReady) {
+  if (!isLanguageReady || !isAuthReady) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#2563eb" />
@@ -27,47 +30,58 @@ export default function AppNavigator() {
 
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName={hasSelectedLanguage ? "Home" : "LanguageSelect"}>
-        <Stack.Screen
-          name="LanguageSelect"
-          component={LanguageSelectScreen}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="Home"
-          component={HomeScreen}
-          options={{ title: t("screen.home") }}
-        />
-        <Stack.Screen
-          name="AddLoan"
-          component={AddLoanScreen}
-          options={{ title: t("screen.addLoan") }}
-        />
-        <Stack.Screen
-          name="Detail"
-          component={DetailScreen}
-          options={{ title: t("screen.detail") }}
-        />
-        <Stack.Screen
-          name="EditLoan"
-          component={EditLoanScreen}
-          options={{ title: t("screen.editLoan") }}
-        />
-        <Stack.Screen
-          name="AddPayment"
-          component={AddPaymentScreen}
-          options={{ title: t("screen.addPayment") }}
-        />
-        <Stack.Screen
-          name="Dashboard"
-          component={DashboardScreen}
-          options={{ title: t("screen.dashboard") }}
-        />
-        <Stack.Screen
-          name="Borrowers"
-          component={BorrowersScreen}
-          options={{ title: t("screen.borrowers") }}
-        />
+      <Stack.Navigator>
+        {!hasSelectedLanguage ? (
+          <Stack.Screen
+            name="LanguageSelect"
+            component={LanguageSelectScreen}
+            options={{ headerShown: false }}
+          />
+        ) : !session ? (
+          <Stack.Screen
+            name="PhoneAuth"
+            component={PhoneAuthScreen}
+            options={{ title: t("screen.phoneAuth"), headerLeft: () => null }}
+          />
+        ) : (
+          <>
+            <Stack.Screen
+              name="Home"
+              component={HomeScreen}
+              options={{ title: t("screen.home"), headerLeft: () => null }}
+            />
+            <Stack.Screen
+              name="AddLoan"
+              component={AddLoanScreen}
+              options={{ title: t("screen.addLoan") }}
+            />
+            <Stack.Screen
+              name="Detail"
+              component={DetailScreen}
+              options={{ title: t("screen.detail") }}
+            />
+            <Stack.Screen
+              name="EditLoan"
+              component={EditLoanScreen}
+              options={{ title: t("screen.editLoan") }}
+            />
+            <Stack.Screen
+              name="AddPayment"
+              component={AddPaymentScreen}
+              options={{ title: t("screen.addPayment") }}
+            />
+            <Stack.Screen
+              name="Dashboard"
+              component={DashboardScreen}
+              options={{ title: t("screen.dashboard") }}
+            />
+            <Stack.Screen
+              name="Borrowers"
+              component={BorrowersScreen}
+              options={{ title: t("screen.borrowers") }}
+            />
+          </>
+        )}
       </Stack.Navigator>
     </NavigationContainer>
   );
