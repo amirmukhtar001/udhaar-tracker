@@ -30,7 +30,6 @@ export default function HomeScreen({ navigation }) {
   const [loans, setLoans] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState("ALL");
-  const [sortBy, setSortBy] = useState("NEWEST");
   const [isSigningOut, setIsSigningOut] = useState(false);
 
   const loadLoans = useCallback(async () => {
@@ -70,23 +69,8 @@ export default function HomeScreen({ navigation }) {
   });
 
   const sortedLoans = [...filteredLoans].sort((a, b) => {
-    const amountA = Number(a.amount || 0);
-    const amountB = Number(b.amount || 0);
     const createdA = new Date(a.createdAt || a.date || 0).getTime();
     const createdB = new Date(b.createdAt || b.date || 0).getTime();
-    const overdueA = isLoanOverdue(a);
-    const overdueB = isLoanOverdue(b);
-    const dueA = new Date(a.reminderDate || a.date || 0).getTime();
-    const dueB = new Date(b.reminderDate || b.date || 0).getTime();
-
-    if (sortBy === "OLDEST") return createdA - createdB;
-    if (sortBy === "HIGHEST_AMOUNT") return amountB - amountA;
-    if (sortBy === "OVERDUE_FIRST") {
-      if (overdueA && !overdueB) return -1;
-      if (!overdueA && overdueB) return 1;
-      return dueA - dueB;
-    }
-
     return createdB - createdA;
   });
 
@@ -223,29 +207,6 @@ export default function HomeScreen({ navigation }) {
             >
               <Text style={[styles.filterChipText, isActive ? styles.filterChipTextActive : null]}>
                 {filter.label}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
-      </View>
-
-      <View style={styles.sortRow}>
-        <Text style={styles.sortLabel}>{t("home.sort")}</Text>
-        {[
-          { key: "NEWEST", label: t("home.sort.newest") },
-          { key: "OLDEST", label: t("home.sort.oldest") },
-          { key: "HIGHEST_AMOUNT", label: t("home.sort.highest") },
-          { key: "OVERDUE_FIRST", label: t("home.sort.overdue") }
-        ].map((option) => {
-          const isActive = sortBy === option.key;
-          return (
-            <TouchableOpacity
-              key={option.key}
-              style={[styles.sortChip, isActive ? styles.sortChipActive : null]}
-              onPress={() => setSortBy(option.key)}
-            >
-              <Text style={[styles.sortChipText, isActive ? styles.sortChipTextActive : null]}>
-                {option.label}
               </Text>
             </TouchableOpacity>
           );
@@ -413,40 +374,6 @@ const styles = StyleSheet.create({
     fontWeight: "600"
   },
   filterChipTextActive: {
-    color: "#fff"
-  },
-  sortRow: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    alignItems: "center",
-    marginBottom: 8
-  },
-  sortLabel: {
-    marginRight: 8,
-    color: "#374151",
-    fontWeight: "600",
-    marginBottom: 8
-  },
-  sortChip: {
-    borderWidth: 1,
-    borderColor: "#d1d5db",
-    borderRadius: 999,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    backgroundColor: "#fff",
-    marginRight: 8,
-    marginBottom: 8
-  },
-  sortChipActive: {
-    backgroundColor: "#111827",
-    borderColor: "#111827"
-  },
-  sortChipText: {
-    color: "#374151",
-    fontWeight: "600",
-    fontSize: 12
-  },
-  sortChipTextActive: {
     color: "#fff"
   },
   listContent: {
