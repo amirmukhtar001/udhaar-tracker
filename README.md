@@ -32,19 +32,18 @@ After changing env values, restart Metro:
 npx expo start -c
 ```
 
-## Phone OTP (Supabase Auth)
+## Email OTP (Supabase Auth)
 
-This app includes a mobile-number sign-in screen using Supabase SMS OTP.
+This app includes an email sign-in screen using Supabase OTP.
 
 Enable OTP in Supabase:
 
 1. Open Supabase Dashboard -> Authentication -> Providers.
-2. Enable Phone provider.
-3. Configure an SMS provider in Supabase Auth settings (Twilio/MessageBird/etc).
-4. Save settings.
+2. Enable Email provider.
+3. Save settings.
 
 App flow:
-- Language select -> Phone number -> OTP verify -> Home
+- Language select -> Email -> OTP verify -> Home
 
 ## Notes
 

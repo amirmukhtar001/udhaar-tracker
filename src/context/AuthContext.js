@@ -44,24 +44,27 @@ export function AuthProvider({ children }) {
     };
   }, []);
 
-  const sendOtp = async (phone) => {
+  const sendOtp = async (email) => {
     if (!isSupabaseConfigured || !supabase) {
       return { error: new Error("Supabase is not configured.") };
     }
     const { error } = await supabase.auth.signInWithOtp({
-      phone
+      email,
+      options: {
+        shouldCreateUser: true
+      }
     });
     return { error };
   };
 
-  const verifyOtp = async (phone, token) => {
+  const verifyOtp = async (email, token) => {
     if (!isSupabaseConfigured || !supabase) {
       return { error: new Error("Supabase is not configured.") };
     }
     const { error } = await supabase.auth.verifyOtp({
-      phone,
+      email,
       token,
-      type: "sms"
+      type: "email"
     });
     return { error };
   };

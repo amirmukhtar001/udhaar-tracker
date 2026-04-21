@@ -13,17 +13,14 @@ import {
 import { useAuth } from "../context/AuthContext";
 import { useLanguage } from "../context/LanguageContext";
 
-function normalizePhone(raw) {
-  const cleaned = String(raw || "").replace(/[^\d+]/g, "");
-  if (!cleaned) return "";
-  if (cleaned.startsWith("+")) return cleaned;
-  return `+${cleaned}`;
+function isValidEmail(value) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value || "").trim());
 }
 
 export default function PhoneAuthScreen({ navigation }) {
   const { session, sendOtp, verifyOtp, isSupabaseEnabled } = useAuth();
   const { t } = useLanguage();
-  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
   const [otpSent, setOtpSent] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -37,15 +34,15 @@ export default function PhoneAuthScreen({ navigation }) {
     }
   }, [session, navigation]);
 
-  const handleSendOtp = async (rawPhone = phone) => {
-    const normalizedPhone = normalizePhone(rawPhone);
-    if (!normalizedPhone) {
-      Alert.alert(t("common.validation"), t("auth.validation.phoneRequired"));
+  const handleSendOtp = async () => {
+    const normalizedEmail = String(email || "").trim().toLowerCase();
+    if (!isValidEmail(normalizedEmail)) {
+      Alert.alert(t("common.validation"), t("auth.validation.emailRequired"));
       return;
     }
 
     setLoading(true);
-    const { error } = await sendOtp(normalizedPhone);
+    const { error } = await sendOtp(normalizedEmail);
     setLoading(false);
 
     if (error) {
@@ -53,7 +50,7 @@ export default function PhoneAuthScreen({ navigation }) {
       return;
     }
 
-    setPhone(normalizedPhone);
+    setEmail(normalizedEmail);
     setOtpSent(true);
     Alert.alert(t("auth.otpSentTitle"), t("auth.otpSentMessage"));
   };
@@ -65,7 +62,7 @@ export default function PhoneAuthScreen({ navigation }) {
     }
 
     setLoading(true);
-    const { error } = await verifyOtp(phone, otp.trim());
+    const { error } = await verifyOtp(email, otp.trim());
     setLoading(false);
 
     if (error) {
@@ -73,9 +70,6 @@ export default function PhoneAuthScreen({ navigation }) {
       return;
     }
   };
-
-  const phoneDigits = phone.replace(/^\+?92/, "");
-  const fullPhone = `+92${phoneDigits}`;
 
   return (
     <KeyboardAvoidingView
@@ -91,15 +85,13 @@ export default function PhoneAuthScreen({ navigation }) {
 
         {!otpSent ? (
           <View style={styles.phoneRow}>
-            <View style={styles.codeBox}>
-              <Text style={styles.codeText}>🇵🇰 +92</Text>
-            </View>
             <TextInput
-              value={phoneDigits}
-              onChangeText={(value) => setPhone(value.replace(/[^\d]/g, ""))}
-              placeholder="3xxxxxxxxx"
-              keyboardType="phone-pad"
+              value={email}
+              onChangeText={setEmail}
+              placeholder={t("auth.emailPlaceholder")}
+              keyboardType="email-address"
               autoCapitalize="none"
+              autoCorrect={false}
               style={styles.phoneInput}
               editable={!otpSent}
             />
@@ -117,7 +109,7 @@ export default function PhoneAuthScreen({ navigation }) {
               autoCapitalize="none"
               style={styles.input}
             />
-            <Text style={styles.helpText}>{fullPhone}</Text>
+            <Text style={styles.helpText}>{email}</Text>
           </>
         ) : (
           <View style={styles.bigSpacer} />
@@ -149,11 +141,8 @@ export default function PhoneAuthScreen({ navigation }) {
           ) : (
             <TouchableOpacity
               style={[styles.primaryButton, loading ? styles.disabled : null]}
-              onPress={async () => {
-                setPhone(fullPhone);
-                await handleSendOtp(fullPhone);
-              }}
-              disabled={loading || !isSupabaseEnabled || phoneDigits.length < 10}
+              onPress={handleSendOtp}
+              disabled={loading || !isSupabaseEnabled || !isValidEmail(email)}
             >
               <Text style={styles.primaryButtonText}>
                 {loading ? t("common.loading") : t("auth.sendOtpButton")}
@@ -189,27 +178,13 @@ const styles = StyleSheet.create({
   },
   phoneRow: {
     marginTop: 34,
-    flexDirection: "row",
-    alignItems: "center",
     borderBottomWidth: 1,
     borderBottomColor: "#e5e7eb",
     paddingBottom: 8
   },
-  codeBox: {
-    borderBottomWidth: 1,
-    borderBottomColor: "#e5e7eb",
-    paddingBottom: 8,
-    marginRight: 12,
-    minWidth: 82
-  },
-  codeText: {
-    color: "#6b7280",
-    fontSize: 16
-  },
   phoneInput: {
-    flex: 1,
     color: "#111827",
-    fontSize: 18,
+    fontSize: 17,
     paddingVertical: 0
   },
   label: {
