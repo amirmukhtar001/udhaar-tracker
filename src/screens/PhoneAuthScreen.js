@@ -5,7 +5,10 @@ import {
   StyleSheet,
   TextInput,
   TouchableOpacity,
-  Alert
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView
 } from "react-native";
 import { useAuth } from "../context/AuthContext";
 import { useLanguage } from "../context/LanguageContext";
@@ -34,8 +37,8 @@ export default function PhoneAuthScreen({ navigation }) {
     }
   }, [session, navigation]);
 
-  const handleSendOtp = async () => {
-    const normalizedPhone = normalizePhone(phone);
+  const handleSendOtp = async (rawPhone = phone) => {
+    const normalizedPhone = normalizePhone(rawPhone);
     if (!normalizedPhone) {
       Alert.alert(t("common.validation"), t("auth.validation.phoneRequired"));
       return;
@@ -71,24 +74,37 @@ export default function PhoneAuthScreen({ navigation }) {
     }
   };
 
+  const phoneDigits = phone.replace(/^\+?92/, "");
+  const fullPhone = `+92${phoneDigits}`;
+
   return (
-    <View style={styles.container}>
-      <View style={styles.card}>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 70 : 18}
+    >
+      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         <Text style={styles.title}>{t("auth.title")}</Text>
         <Text style={styles.subtitle}>
           {isSupabaseEnabled ? t("auth.subtitle") : t("auth.supabaseDisabled")}
         </Text>
 
-        <Text style={styles.label}>{t("auth.phoneLabel")}</Text>
-        <TextInput
-          value={phone}
-          onChangeText={setPhone}
-          placeholder={t("auth.phonePlaceholder")}
-          keyboardType="phone-pad"
-          autoCapitalize="none"
-          style={styles.input}
-          editable={!otpSent}
-        />
+        {!otpSent ? (
+          <View style={styles.phoneRow}>
+            <View style={styles.codeBox}>
+              <Text style={styles.codeText}>🇵🇰 +92</Text>
+            </View>
+            <TextInput
+              value={phoneDigits}
+              onChangeText={(value) => setPhone(value.replace(/[^\d]/g, ""))}
+              placeholder="3xxxxxxxxx"
+              keyboardType="phone-pad"
+              autoCapitalize="none"
+              style={styles.phoneInput}
+              editable={!otpSent}
+            />
+          </View>
+        ) : null}
 
         {otpSent ? (
           <>
@@ -101,67 +117,105 @@ export default function PhoneAuthScreen({ navigation }) {
               autoCapitalize="none"
               style={styles.input}
             />
-            <TouchableOpacity
-              style={[styles.primaryButton, loading ? styles.disabled : null]}
-              onPress={handleVerifyOtp}
-              disabled={loading}
-            >
-              <Text style={styles.primaryButtonText}>
-                {loading ? t("common.loading") : t("auth.verifyButton")}
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.secondaryButton}
-              onPress={() => {
-                setOtpSent(false);
-                setOtp("");
-              }}
-              disabled={loading}
-            >
-              <Text style={styles.secondaryButtonText}>{t("auth.changeNumber")}</Text>
-            </TouchableOpacity>
+            <Text style={styles.helpText}>{fullPhone}</Text>
           </>
         ) : (
-          <TouchableOpacity
-            style={[styles.primaryButton, loading ? styles.disabled : null]}
-            onPress={handleSendOtp}
-            disabled={loading || !isSupabaseEnabled}
-          >
-            <Text style={styles.primaryButtonText}>
-              {loading ? t("common.loading") : t("auth.sendOtpButton")}
-            </Text>
-          </TouchableOpacity>
+          <View style={styles.bigSpacer} />
         )}
-      </View>
-    </View>
+
+        <View style={styles.bottomArea}>
+          {otpSent ? (
+            <>
+              <TouchableOpacity
+                style={[styles.primaryButton, loading ? styles.disabled : null]}
+                onPress={handleVerifyOtp}
+                disabled={loading}
+              >
+                <Text style={styles.primaryButtonText}>
+                  {loading ? t("common.loading") : t("auth.verifyButton")}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.secondaryButton}
+                onPress={() => {
+                  setOtpSent(false);
+                  setOtp("");
+                }}
+                disabled={loading}
+              >
+                <Text style={styles.secondaryButtonText}>{t("auth.changeNumber")}</Text>
+              </TouchableOpacity>
+            </>
+          ) : (
+            <TouchableOpacity
+              style={[styles.primaryButton, loading ? styles.disabled : null]}
+              onPress={async () => {
+                setPhone(fullPhone);
+                await handleSendOtp(fullPhone);
+              }}
+              disabled={loading || !isSupabaseEnabled || phoneDigits.length < 10}
+            >
+              <Text style={styles.primaryButtonText}>
+                {loading ? t("common.loading") : t("auth.sendOtpButton")}
+              </Text>
+            </TouchableOpacity>
+          )}
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f3f4f6",
-    padding: 16,
-    justifyContent: "center"
+    backgroundColor: "#fff"
   },
-  card: {
-    backgroundColor: "#fff",
-    borderRadius: 14,
-    padding: 16
+  content: {
+    flexGrow: 1,
+    paddingHorizontal: 20,
+    paddingTop: 36,
+    paddingBottom: 18
   },
   title: {
-    color: "#111827",
-    fontSize: 22,
-    fontWeight: "700"
+    color: "#1f2937",
+    fontSize: 44 / 2,
+    fontWeight: "700",
+    marginTop: 6
   },
   subtitle: {
     color: "#6b7280",
-    marginTop: 6,
-    marginBottom: 14
+    marginTop: 6
+  },
+  phoneRow: {
+    marginTop: 34,
+    flexDirection: "row",
+    alignItems: "center",
+    borderBottomWidth: 1,
+    borderBottomColor: "#e5e7eb",
+    paddingBottom: 8
+  },
+  codeBox: {
+    borderBottomWidth: 1,
+    borderBottomColor: "#e5e7eb",
+    paddingBottom: 8,
+    marginRight: 12,
+    minWidth: 82
+  },
+  codeText: {
+    color: "#6b7280",
+    fontSize: 16
+  },
+  phoneInput: {
+    flex: 1,
+    color: "#111827",
+    fontSize: 18,
+    paddingVertical: 0
   },
   label: {
     color: "#374151",
     fontWeight: "600",
+    marginTop: 30,
     marginBottom: 6
   },
   input: {
@@ -172,11 +226,22 @@ const styles = StyleSheet.create({
     paddingVertical: 11,
     marginBottom: 12
   },
+  helpText: {
+    color: "#6b7280",
+    fontSize: 12
+  },
+  bigSpacer: {
+    flex: 1
+  },
+  bottomArea: {
+    marginTop: "auto",
+    paddingTop: 16
+  },
   primaryButton: {
     backgroundColor: "#2563eb",
     borderRadius: 10,
     alignItems: "center",
-    paddingVertical: 12
+    paddingVertical: 14
   },
   primaryButtonText: {
     color: "#fff",
