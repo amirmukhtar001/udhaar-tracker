@@ -27,3 +27,34 @@ create trigger trg_loans_updated_at
 before update on public.loans
 for each row
 execute function public.set_updated_at();
+
+alter table public.loans enable row level security;
+
+drop policy if exists "loans_select_all" on public.loans;
+create policy "loans_select_all"
+on public.loans
+for select
+to anon, authenticated
+using (true);
+
+drop policy if exists "loans_insert_all" on public.loans;
+create policy "loans_insert_all"
+on public.loans
+for insert
+to anon, authenticated
+with check (true);
+
+drop policy if exists "loans_update_all" on public.loans;
+create policy "loans_update_all"
+on public.loans
+for update
+to anon, authenticated
+using (true)
+with check (true);
+
+drop policy if exists "loans_delete_all" on public.loans;
+create policy "loans_delete_all"
+on public.loans
+for delete
+to anon, authenticated
+using (true);
