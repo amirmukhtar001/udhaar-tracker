@@ -45,6 +45,25 @@ Enable OTP in Supabase:
 App flow:
 - Language select -> Email -> OTP verify -> Home
 
+Template requirement for OTP emails:
+
+- In Supabase templates, use `{{ .Token }}` (do not use `{{ .ConfirmationURL }}`) in both:
+  - `Magic Link`
+  - `Confirm signup`
+
+The app also supports pasting a full verification URL (with `token_hash`) as a fallback.
+
+## Legal and store release
+
+- Privacy policy file: `docs/privacy-policy.md`
+- Release checklist: `docs/store-release-checklist.md`
+- In-app legal screen: `Legal & Support` quick action on Home
+
+Before store submission, host privacy policy at a public HTTPS URL and update:
+
+- `src/config/appMeta.js` (`supportEmail`, `privacyPolicyUrl`)
+- `app.json` -> `expo.extra.privacyPolicyUrl`
+
 ## Notes
 
 - Supabase integration is handled inside `src/storage/loanStorage.js`.

@@ -2,13 +2,32 @@
   "expo": {
     "name": "Udhaar Tracker",
     "slug": "udhaar-tracker",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
+    "scheme": "udhaartracker",
     "assetBundlePatterns": ["**/*"],
-    "android": {
-      "package": "com.udhaartracker.app"
+    "ios": {
+      "bundleIdentifier": "com.udhaartracker.app",
+      "buildNumber": "1.0.1",
+      "supportsTablet": false
     },
-    "plugins": ["expo-notifications"]
+    "android": {
+      "package": "com.udhaartracker.app",
+      "versionCode": 2,
+      "permissions": ["POST_NOTIFICATIONS"]
+    },
+    "plugins": [
+      [
+        "expo-notifications",
+        {
+          "color": "#2563eb"
+        }
+      ]
+    ],
+    "extra": {
+      "supportEmail": "support@udhaartracker.app",
+      "privacyPolicyUrl": "https://example.com/udhaar-tracker/privacy-policy"
+    }
   }
 }

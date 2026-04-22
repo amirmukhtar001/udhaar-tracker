@@ -112,8 +112,9 @@ export default function HomeScreen({ navigation }) {
   };
 
   const quickActions = [
-    { key: "Dashboard", label: "Dashboard" },
-    { key: "Borrowers", label: "Borrowers" }
+    { key: "Dashboard", label: t("home.dashboard") },
+    { key: "Borrowers", label: t("home.borrowers") },
+    { key: "Legal", label: t("home.legal") }
   ];
 
   const handleLogout = () => {
@@ -170,9 +171,7 @@ export default function HomeScreen({ navigation }) {
             style={styles.quickActionBtn}
             onPress={() => navigation.navigate(action.key)}
           >
-            <Text style={styles.quickActionText}>
-              {action.key === "Dashboard" ? t("home.dashboard") : t("home.borrowers")}
-            </Text>
+            <Text style={styles.quickActionText}>{action.label}</Text>
           </TouchableOpacity>
         ))}
       </View>
@@ -302,10 +301,11 @@ const styles = StyleSheet.create({
   quickActionsRow: {
     flexDirection: "row",
     justifyContent: "space-between",
+    flexWrap: "wrap",
     marginBottom: 10
   },
   quickActionBtn: {
-    width: "48.5%",
+    width: "32%",
     backgroundColor: "#fff",
     borderWidth: 1,
     borderColor: "#d1d5db",

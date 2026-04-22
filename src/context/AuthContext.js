@@ -7,6 +7,7 @@ const AuthContext = createContext({
   isSupabaseEnabled: false,
   sendOtp: async () => ({ error: null }),
   verifyOtp: async () => ({ error: null }),
+  verifyOtpTokenHash: async () => ({ error: null }),
   signOut: async () => ({ error: null })
 });
 
@@ -69,6 +70,17 @@ export function AuthProvider({ children }) {
     return { error };
   };
 
+  const verifyOtpTokenHash = async (tokenHash, type = "email") => {
+    if (!isSupabaseConfigured || !supabase) {
+      return { error: new Error("Supabase is not configured.") };
+    }
+    const { error } = await supabase.auth.verifyOtp({
+      token_hash: tokenHash,
+      type
+    });
+    return { error };
+  };
+
   const signOut = async () => {
     if (!isSupabaseConfigured || !supabase) return { error: null };
     const { error } = await supabase.auth.signOut();
@@ -82,6 +94,7 @@ export function AuthProvider({ children }) {
       isSupabaseEnabled: isSupabaseConfigured,
       sendOtp,
       verifyOtp,
+      verifyOtpTokenHash,
       signOut
     }),
     [session, isAuthReady]

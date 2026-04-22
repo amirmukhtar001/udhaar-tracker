@@ -9,6 +9,7 @@ import EditLoanScreen from "../screens/EditLoanScreen";
 import AddPaymentScreen from "../screens/AddPaymentScreen";
 import DashboardScreen from "../screens/DashboardScreen";
 import BorrowersScreen from "../screens/BorrowersScreen";
+import LegalScreen from "../screens/LegalScreen";
 import LanguageSelectScreen from "../screens/LanguageSelectScreen";
 import { useLanguage } from "../context/LanguageContext";
 import { useAuth } from "../context/AuthContext";
@@ -79,6 +80,11 @@ export default function AppNavigator() {
               name="Borrowers"
               component={BorrowersScreen}
               options={{ title: t("screen.borrowers") }}
+            />
+            <Stack.Screen
+              name="Legal"
+              component={LegalScreen}
+              options={{ title: t("screen.legal") }}
             />
           </>
         )}

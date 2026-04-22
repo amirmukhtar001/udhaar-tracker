@@ -8,7 +8,8 @@ import {
   Alert,
   KeyboardAvoidingView,
   Platform,
-  ScrollView
+  ScrollView,
+  Linking
 } from "react-native";
 import { useAuth } from "../context/AuthContext";
 import { useLanguage } from "../context/LanguageContext";
@@ -17,8 +18,23 @@ function isValidEmail(value) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value || "").trim());
 }
 
+function extractTokenHash(input) {
+  const raw = String(input || "").trim();
+  if (!raw.includes("://") && !raw.includes("/auth/v1/verify")) return null;
+
+  try {
+    const parsed = new URL(raw);
+    const tokenHash = parsed.searchParams.get("token_hash");
+    const type = parsed.searchParams.get("type") || "email";
+    if (!tokenHash) return null;
+    return { tokenHash, type };
+  } catch (_error) {
+    return null;
+  }
+}
+
 export default function PhoneAuthScreen({ navigation }) {
-  const { session, sendOtp, verifyOtp, isSupabaseEnabled } = useAuth();
+  const { session, sendOtp, verifyOtp, verifyOtpTokenHash, isSupabaseEnabled } = useAuth();
   const { t } = useLanguage();
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
@@ -56,13 +72,17 @@ export default function PhoneAuthScreen({ navigation }) {
   };
 
   const handleVerifyOtp = async () => {
-    if (!otp.trim()) {
+    const input = otp.trim();
+    if (!input) {
       Alert.alert(t("common.validation"), t("auth.validation.otpRequired"));
       return;
     }
 
     setLoading(true);
-    const { error } = await verifyOtp(email, otp.trim());
+    const extracted = extractTokenHash(input);
+    const { error } = extracted
+      ? await verifyOtpTokenHash(extracted.tokenHash, extracted.type)
+      : await verifyOtp(email, input);
     setLoading(false);
 
     if (error) {
@@ -110,6 +130,15 @@ export default function PhoneAuthScreen({ navigation }) {
               style={styles.input}
             />
             <Text style={styles.helpText}>{email}</Text>
+            <Text style={styles.helpText}>{t("auth.otpHelp")}</Text>
+            <TouchableOpacity
+              onPress={async () => {
+                const inboxUrl = "https://mail.google.com";
+                await Linking.openURL(inboxUrl);
+              }}
+            >
+              <Text style={styles.linkText}>{t("auth.openInbox")}</Text>
+            </TouchableOpacity>
           </>
         ) : (
           <View style={styles.bigSpacer} />
@@ -203,7 +232,13 @@ const styles = StyleSheet.create({
   },
   helpText: {
     color: "#6b7280",
-    fontSize: 12
+    fontSize: 12,
+    marginBottom: 4
+  },
+  linkText: {
+    color: "#2563eb",
+    fontWeight: "600",
+    marginTop: 2
   },
   bigSpacer: {
     flex: 1
