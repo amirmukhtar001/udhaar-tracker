@@ -1,4 +1,4 @@
-# Store Release Checklist - Udhaar Tracker
+# Store Release Checklist - Smart Udhaar
 
 ## 1) Authentication finalization (Email OTP)
 
@@ -17,7 +17,7 @@
 
 ## 3) Production app configuration
 
-- App name: Udhaar Tracker
+- App name: Smart Udhaar
 - Android package: com.udhaartracker.app
 - iOS bundle ID: com.udhaartracker.app
 - Version: 1.0.1
@@ -36,7 +36,7 @@
 
 Store listing purpose text (recommended):
 
-"Udhaar Tracker uses notifications only to remind you about borrower payment reminders you set manually. Notifications are optional and can be turned off anytime in device settings."
+"Smart Udhaar uses notifications only to remind you about borrower payment reminders you set manually. Notifications are optional and can be turned off anytime in device settings."
 
 ## 6) Data/account expectations text (for listing)
 

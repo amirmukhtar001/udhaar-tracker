@@ -4,7 +4,7 @@ export const SUPPORTED_LANGUAGES = ["roman_urdu", "urdu", "english", "sindhi", "
 
 export const translations = {
   english: {
-    "app.title": "Udhaar Tracker",
+    "app.title": "Smart Udhaar",
     "common.next": "NEXT",
     "common.loading": "Loading...",
     "common.notSet": "Not set",
@@ -17,7 +17,7 @@ export const translations = {
     "common.clearReminder": "Clear Reminder",
     "common.validation": "Validation",
     "common.error": "Error",
-    "screen.home": "Udhaar Tracker",
+    "screen.home": "Smart Udhaar",
     "screen.addLoan": "Add Loan",
     "screen.detail": "Loan Detail",
     "screen.editLoan": "Edit Loan",
@@ -174,7 +174,7 @@ export const translations = {
     "notification.body": "{name} owes you {amount}"
   },
   roman_urdu: {
-    "app.title": "Udhaar Tracker",
+    "app.title": "Smart Udhaar",
     "common.next": "NEXT",
     "common.loading": "Load ho raha hai...",
     "common.notSet": "Set nahi",
@@ -187,7 +187,7 @@ export const translations = {
     "common.clearReminder": "Reminder clear karein",
     "common.validation": "Validation",
     "common.error": "Error",
-    "screen.home": "Udhaar Tracker",
+    "screen.home": "Smart Udhaar",
     "screen.addLoan": "Naya Udhaar",
     "screen.detail": "Udhaar Detail",
     "screen.editLoan": "Udhaar Edit",

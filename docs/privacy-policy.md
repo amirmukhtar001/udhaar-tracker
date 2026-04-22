@@ -1,10 +1,10 @@
-# Privacy Policy - Udhaar Tracker
+# Privacy Policy - Smart Udhaar
 
 Effective date: 2026-04-20
 
 ## Who we are
 
-Udhaar Tracker is a personal loan tracking app.
+Smart Udhaar is a personal loan tracking app.
 
 Support contact: support@udhaartracker.app
 

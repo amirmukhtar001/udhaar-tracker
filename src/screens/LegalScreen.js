@@ -15,8 +15,8 @@ export default function LegalScreen() {
   };
 
   const openEmail = async () => {
-    const subject = encodeURIComponent("Udhaar Tracker Support");
-    const body = encodeURIComponent("Hello, I need help with Udhaar Tracker.");
+    const subject = encodeURIComponent("Smart Udhaar Support");
+    const body = encodeURIComponent("Hello, I need help with Smart Udhaar.");
     const mailto = `mailto:${APP_META.supportEmail}?subject=${subject}&body=${body}`;
     await openUrl(mailto);
   };

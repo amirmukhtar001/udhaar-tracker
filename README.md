@@ -1,4 +1,4 @@
-# Udhaar Tracker
+# Smart Udhaar
 
 ## Backend without separate deployment (Supabase)
 

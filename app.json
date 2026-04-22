@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "Udhaar Tracker",
-    "slug": "udhaar-tracker",
+    "name": "Smart Udhaar",
+    "slug": "smart-udhaar",
     "version": "1.0.1",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
-    "scheme": "udhaartracker",
+    "scheme": "smartudhaar",
     "assetBundlePatterns": ["**/*"],
     "ios": {
       "bundleIdentifier": "com.udhaartracker.app",
@@ -27,7 +27,7 @@
     ],
     "extra": {
       "supportEmail": "support@udhaartracker.app",
-      "privacyPolicyUrl": "https://example.com/udhaar-tracker/privacy-policy"
+      "privacyPolicyUrl": "https://example.com/smart-udhaar/privacy-policy"
     }
   }
 }
