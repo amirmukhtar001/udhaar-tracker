@@ -8,7 +8,8 @@ import {
   StyleSheet,
   TouchableOpacity,
   Text,
-  Alert
+  Alert,
+  Linking
 } from "react-native";
 import {
   DrawerContentScrollView,
@@ -27,6 +28,7 @@ import LanguageSelectScreen from "../screens/LanguageSelectScreen";
 import { useLanguage } from "../context/LanguageContext";
 import { useAuth } from "../context/AuthContext";
 import PhoneAuthScreen from "../screens/PhoneAuthScreen";
+import { APP_META } from "../config/appMeta";
 
 const RootStack = createNativeStackNavigator();
 const MainStack = createNativeStackNavigator();
@@ -83,6 +85,11 @@ function MainStackNavigator() {
         component={BorrowersScreen}
         options={{ title: t("screen.borrowers") }}
       />
+      <MainStack.Screen
+        name="LanguageSelect"
+        component={LanguageSelectScreen}
+        options={{ title: t("lang.select") }}
+      />
     </MainStack.Navigator>
   );
 }
@@ -90,6 +97,20 @@ function MainStackNavigator() {
 function AppDrawerNavigator() {
   const { t } = useLanguage();
   const { signOut } = useAuth();
+  const openUrl = async (url) => {
+    try {
+      await Linking.openURL(url);
+    } catch (_error) {
+      Alert.alert(t("common.error"), t("legal.openUrlError"));
+    }
+  };
+
+  const openEmail = async () => {
+    const subject = encodeURIComponent("Smart Udhaar Support");
+    const body = encodeURIComponent("Hello, I need help with Smart Udhaar.");
+    const mailto = `mailto:${APP_META.supportEmail}?subject=${subject}&body=${body}`;
+    await openUrl(mailto);
+  };
 
   const handleLogout = () => {
     Alert.alert(t("auth.logoutTitle"), t("auth.logoutMessage"), [
@@ -116,10 +137,29 @@ function AppDrawerNavigator() {
           </DrawerContentScrollView>
           <View style={styles.drawerFooter}>
             <DrawerItem
+              label={t("lang.select")}
+              labelStyle={styles.drawerFooterLabel}
+              onPress={() => {
+                props.navigation.navigate("MainStack", { screen: "LanguageSelect" });
+                props.navigation.closeDrawer();
+              }}
+            />
+            <DrawerItem
+              label={t("legal.privacyPolicyButton")}
+              labelStyle={styles.drawerFooterLabel}
+              onPress={() => openUrl(APP_META.privacyPolicyUrl)}
+            />
+            <DrawerItem
+              label={t("legal.contactSupportButton")}
+              labelStyle={styles.drawerFooterLabel}
+              onPress={openEmail}
+            />
+            <DrawerItem
               label={t("auth.logoutButton")}
               labelStyle={styles.drawerLogoutLabel}
               onPress={handleLogout}
             />
+            <Text style={styles.drawerVersionText}>{`Smart Udhaar v${APP_META.appVersion}`}</Text>
           </View>
         </View>
       )}
@@ -207,8 +247,18 @@ const styles = StyleSheet.create({
     paddingTop: 6,
     paddingBottom: 16
   },
+  drawerFooterLabel: {
+    color: "#1f2937",
+    fontWeight: "600"
+  },
   drawerLogoutLabel: {
     color: "#b91c1c",
     fontWeight: "700"
+  },
+  drawerVersionText: {
+    color: "#9ca3af",
+    fontSize: 12,
+    textAlign: "center",
+    marginTop: 2
   }
 });

@@ -5,7 +5,8 @@ import {
   StyleSheet,
   FlatList,
   TouchableOpacity,
-  TextInput
+  TextInput,
+  Alert
 } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import LoanItem from "../components/LoanItem";
@@ -140,13 +141,6 @@ export default function HomeScreen({ navigation }) {
         ))}
       </View>
 
-      <TouchableOpacity
-        style={styles.addBtn}
-        onPress={() => navigation.navigate("AddLoan")}
-      >
-        <Text style={styles.addBtnText}>{t("home.addLoan")}</Text>
-      </TouchableOpacity>
-
       <TextInput
         value={searchQuery}
         onChangeText={setSearchQuery}
@@ -178,6 +172,7 @@ export default function HomeScreen({ navigation }) {
 
       <FlatList
         data={sortedLoans}
+        style={styles.list}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <LoanItem
@@ -204,6 +199,51 @@ export default function HomeScreen({ navigation }) {
           </View>
         }
       />
+
+      <View style={styles.bottomNavWrapper}>
+        <View style={styles.bottomNav}>
+          <TouchableOpacity
+            style={styles.bottomNavItem}
+            onPress={() => navigation.navigate("Dashboard")}
+          >
+            <Text style={styles.bottomNavIcon}>📊</Text>
+            <Text style={styles.bottomNavLabel}>{t("home.dashboard")}</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.bottomNavItem}
+            onPress={() => navigation.navigate("Borrowers")}
+          >
+            <Text style={styles.bottomNavIcon}>👥</Text>
+            <Text style={styles.bottomNavLabel}>{t("home.borrowers")}</Text>
+          </TouchableOpacity>
+
+          <View style={styles.bottomNavCenterGap} />
+
+          <TouchableOpacity
+            style={styles.bottomNavItem}
+            onPress={() => navigation.getParent()?.navigate("Legal")}
+          >
+            <Text style={styles.bottomNavIcon}>⚖️</Text>
+            <Text style={styles.bottomNavLabel}>{t("home.legal")}</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.bottomNavItem}
+            onPress={() => navigation.navigate("LanguageSelect")}
+          >
+            <Text style={styles.bottomNavIcon}>🌐</Text>
+            <Text style={styles.bottomNavLabel}>{t("lang.select")}</Text>
+          </TouchableOpacity>
+        </View>
+
+        <TouchableOpacity
+          style={styles.floatingAddButton}
+          onPress={() => navigation.navigate("AddLoan")}
+        >
+          <Text style={styles.floatingAddIcon}>＋</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
@@ -272,18 +312,6 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     letterSpacing: 0.2
   },
-  addBtn: {
-    backgroundColor: "#2563eb",
-    borderRadius: 10,
-    paddingVertical: 12,
-    alignItems: "center",
-    marginBottom: 10
-  },
-  addBtnText: {
-    color: "#fff",
-    fontWeight: "700",
-    fontSize: 16
-  },
   searchInput: {
     backgroundColor: "#fff",
     borderWidth: 1,
@@ -319,8 +347,11 @@ const styles = StyleSheet.create({
   filterChipTextActive: {
     color: "#fff"
   },
+  list: {
+    flex: 1
+  },
   listContent: {
-    paddingBottom: 30
+    paddingBottom: 120
   },
   emptyBox: {
     alignItems: "center",
@@ -328,5 +359,69 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     color: "#6b7280"
+  },
+  bottomNavWrapper: {
+    position: "absolute",
+    left: 16,
+    right: 16,
+    bottom: 12
+  },
+  bottomNav: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: "#fff",
+    borderWidth: 1,
+    borderColor: "#e5e7eb",
+    borderRadius: 18,
+    paddingVertical: 8,
+    paddingHorizontal: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    elevation: 3
+  },
+  bottomNavItem: {
+    flex: 1,
+    minHeight: 46,
+    justifyContent: "center",
+    alignItems: "center"
+  },
+  bottomNavCenterGap: {
+    width: 62
+  },
+  bottomNavIcon: {
+    fontSize: 16
+  },
+  bottomNavLabel: {
+    color: "#374151",
+    fontSize: 11,
+    marginTop: 2,
+    fontWeight: "600"
+  },
+  floatingAddButton: {
+    position: "absolute",
+    alignSelf: "center",
+    top: -22,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: "#7e22ce",
+    borderWidth: 4,
+    borderColor: "#f3f4f6",
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 6
+  },
+  floatingAddIcon: {
+    color: "#fff",
+    fontSize: 28,
+    lineHeight: 30,
+    fontWeight: "700"
   }
 });
