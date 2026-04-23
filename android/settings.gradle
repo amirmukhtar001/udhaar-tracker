@@ -44,7 +44,7 @@ if (getRNMinorVersion() >= 75) {
   }
 }
 
-rootProject.name = 'Udhaar Tracker'
+rootProject.name = 'Smart Udhaar'
 
 dependencyResolutionManagement {
   versionCatalogs {
