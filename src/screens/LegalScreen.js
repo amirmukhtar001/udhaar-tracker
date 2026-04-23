@@ -27,6 +27,7 @@ export default function LegalScreen() {
       <Text style={styles.bodyText}>{t("legal.accountNotice")}</Text>
       <Text style={styles.bodyText}>{t("legal.dataNotice")}</Text>
       <Text style={styles.bodyText}>{t("legal.notificationNotice")}</Text>
+      <Text style={styles.bodyText}>{t("legal.deletionNotice")}</Text>
 
       <View style={styles.card}>
         <Text style={styles.label}>{t("legal.supportEmailLabel")}</Text>
@@ -39,6 +40,10 @@ export default function LegalScreen() {
 
       <TouchableOpacity style={styles.secondaryButton} onPress={openEmail}>
         <Text style={styles.secondaryButtonText}>{t("legal.contactSupportButton")}</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.dangerButton} onPress={() => openUrl(APP_META.accountDeletionUrl)}>
+        <Text style={styles.dangerButtonText}>{t("legal.deleteAccountButton")}</Text>
       </TouchableOpacity>
     </View>
   );
@@ -100,6 +105,19 @@ const styles = StyleSheet.create({
   },
   secondaryButtonText: {
     color: "#1f2937",
+    fontWeight: "700"
+  },
+  dangerButton: {
+    marginTop: 10,
+    backgroundColor: "#fee2e2",
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#fecaca",
+    alignItems: "center",
+    paddingVertical: 12
+  },
+  dangerButtonText: {
+    color: "#b91c1c",
     fontWeight: "700"
   }
 });

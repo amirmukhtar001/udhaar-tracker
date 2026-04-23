@@ -62,7 +62,8 @@ The app also supports pasting a full verification URL (with `token_hash`) as a f
 Before store submission, host privacy policy at a public HTTPS URL and update:
 
 - `src/config/appMeta.js` (`supportEmail`, `privacyPolicyUrl`)
-- `app.json` -> `expo.extra.privacyPolicyUrl`
+- `src/config/appMeta.js` (`accountDeletionUrl`)
+- `app.json` -> `expo.extra.privacyPolicyUrl`, `expo.extra.accountDeletionUrl`
 
 ## Notes
 

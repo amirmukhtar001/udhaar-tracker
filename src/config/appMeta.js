@@ -1,5 +1,6 @@
 export const APP_META = {
   supportEmail: "support@udhaartracker.app",
-  privacyPolicyUrl: "https://example.com/smart-udhaar/privacy-policy",
+  privacyPolicyUrl: "https://udhaartracker.app/privacy-policy",
+  accountDeletionUrl: "https://udhaartracker.app/account-deletion",
   appVersion: "1.0.1"
 };

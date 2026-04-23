@@ -26,6 +26,7 @@ Support contact: support@udhaartracker.app
 - Account and loan data are stored in Supabase.
 - Access controls are applied so users can only access their own records.
 - The app uses secure tokens for authenticated requests.
+- For reliability, the app may keep a local on-device cache (AsyncStorage) of loan records and language settings so data can still be shown when the network is unavailable.
 
 ## Notifications
 
@@ -41,6 +42,8 @@ Support contact: support@udhaartracker.app
 
 - Your data remains until you delete it in the app or request deletion via support email.
 - You can request account/data deletion by emailing support@udhaartracker.app from your registered email.
+- You can also submit a deletion request from the in-app `Legal & Support` section using the `Request Account Deletion` action.
+- Web deletion request page: https://udhaartracker.app/account-deletion
 
 ## Your rights
 

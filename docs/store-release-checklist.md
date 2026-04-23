@@ -12,6 +12,7 @@
 ## 2) Legal URLs and contacts
 
 - Publish privacy policy at a public HTTPS URL.
+- Publish account deletion request page at a public HTTPS URL.
 - Use support email: support@udhaartracker.app
 - Add the same details to store listing.
 
@@ -43,6 +44,13 @@ Store listing purpose text (recommended):
 Suggested short disclosure:
 
 "The app requires sign-in with email OTP. Loan data is stored per account and protected by access rules so users can only see their own records. Contact support@udhaartracker.app for account or data deletion requests."
+
+## 6.1) Account deletion compliance (Google Play)
+
+- In-app path is available in `Legal & Support` -> `Request Account Deletion`.
+- Add web deletion URL in Play Console data deletion section:
+  - `https://udhaartracker.app/account-deletion`
+- Make sure both in-app path and web URL describe what data is deleted and expected timeline.
 
 ## 7) Final QA before submit
 
