@@ -1,12 +1,12 @@
 # Privacy Policy - Smart Udhaar
 
-Effective date: 2026-04-20
+Effective date: 2026-04-25
 
 ## Who we are
 
 Smart Udhaar is a personal loan tracking app.
 
-Support contact: support@udhaartracker.app
+Support contact: amirmukhtar001@gmail.com
 
 ## What data we collect
 
@@ -41,13 +41,20 @@ Support contact: support@udhaartracker.app
 ## Data retention and deletion
 
 - Your data remains until you delete it in the app or request deletion via support email.
-- You can request account/data deletion by emailing support@udhaartracker.app from your registered email.
+- You can request account/data deletion by emailing amirmukhtar001@gmail.com from your registered email.
 - You can also submit a deletion request from the in-app `Legal & Support` section using the `Request Account Deletion` action.
 - Web deletion request page: https://udhaartracker.app/account-deletion
+- Deletion requests are acknowledged within 72 hours and are typically completed within 7-14 days, subject to account verification and legal obligations.
+- We may retain minimal records where required for fraud prevention, legal compliance, or dispute resolution, after which such records are deleted according to applicable law.
 
 ## Your rights
 
 Depending on your region, you may request access, correction, or deletion of your data.
+
+## Contact and complaint handling
+
+- For privacy or account questions, contact: amirmukhtar001@gmail.com
+- If you believe your data rights were not handled correctly, include your account email and request details so we can investigate and respond.
 
 ## Changes to this policy
 

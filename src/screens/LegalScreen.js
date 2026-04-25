@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Linking, Alert } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, Linking, Alert, ScrollView } from "react-native";
 import { useLanguage } from "../context/LanguageContext";
 import { APP_META } from "../config/appMeta";
 
@@ -22,12 +22,53 @@ export default function LegalScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.contentContainer}
+      showsVerticalScrollIndicator={false}
+    >
       <Text style={styles.heading}>{t("legal.title")}</Text>
-      <Text style={styles.bodyText}>{t("legal.accountNotice")}</Text>
-      <Text style={styles.bodyText}>{t("legal.dataNotice")}</Text>
-      <Text style={styles.bodyText}>{t("legal.notificationNotice")}</Text>
-      <Text style={styles.bodyText}>{t("legal.deletionNotice")}</Text>
+      <Text style={styles.subheading}>{t("legal.lastUpdated")}</Text>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>{t("legal.section.accountTitle")}</Text>
+        <Text style={styles.bodyText}>{t("legal.accountNotice")}</Text>
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>{t("legal.section.collectionTitle")}</Text>
+        <Text style={styles.bodyText}>{t("legal.dataCollectionNotice")}</Text>
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>{t("legal.section.processingTitle")}</Text>
+        <Text style={styles.bodyText}>{t("legal.dataNotice")}</Text>
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>{t("legal.section.storageTitle")}</Text>
+        <Text style={styles.bodyText}>{t("legal.storageNotice")}</Text>
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>{t("legal.section.notificationsTitle")}</Text>
+        <Text style={styles.bodyText}>{t("legal.notificationNotice")}</Text>
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>{t("legal.section.rightsTitle")}</Text>
+        <Text style={styles.bodyText}>{t("legal.rightsNotice")}</Text>
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>{t("legal.section.deletionTitle")}</Text>
+        <Text style={styles.bodyText}>{t("legal.deletionNotice")}</Text>
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>{t("legal.section.policyUpdatesTitle")}</Text>
+        <Text style={styles.bodyText}>{t("legal.policyUpdatesNotice")}</Text>
+      </View>
 
       <View style={styles.card}>
         <Text style={styles.label}>{t("legal.supportEmailLabel")}</Text>
@@ -45,7 +86,7 @@ export default function LegalScreen() {
       <TouchableOpacity style={styles.dangerButton} onPress={() => openUrl(APP_META.accountDeletionUrl)}>
         <Text style={styles.dangerButtonText}>{t("legal.deleteAccountButton")}</Text>
       </TouchableOpacity>
-    </View>
+    </ScrollView>
   );
 }
 
@@ -55,15 +96,29 @@ const styles = StyleSheet.create({
     backgroundColor: "#f3f4f6",
     padding: 16
   },
+  contentContainer: {
+    paddingBottom: 28
+  },
   heading: {
     fontSize: 22,
     fontWeight: "700",
     color: "#111827",
+    marginBottom: 2
+  },
+  subheading: {
+    color: "#6b7280",
+    marginBottom: 12
+  },
+  section: {
     marginBottom: 10
+  },
+  sectionTitle: {
+    color: "#111827",
+    fontWeight: "700",
+    marginBottom: 4
   },
   bodyText: {
     color: "#374151",
-    marginBottom: 8,
     lineHeight: 20
   },
   card: {

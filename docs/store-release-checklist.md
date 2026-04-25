@@ -13,7 +13,7 @@
 
 - Publish privacy policy at a public HTTPS URL.
 - Publish account deletion request page at a public HTTPS URL.
-- Use support email: support@udhaartracker.app
+- Use support email: amirmukhtar001@gmail.com
 - Add the same details to store listing.
 
 ## 3) Production app configuration
@@ -43,7 +43,7 @@ Store listing purpose text (recommended):
 
 Suggested short disclosure:
 
-"The app requires sign-in with email OTP. Loan data is stored per account and protected by access rules so users can only see their own records. Contact support@udhaartracker.app for account or data deletion requests."
+"The app requires sign-in with email OTP. Loan data is stored per account and protected by access rules so users can only see their own records. Contact amirmukhtar001@gmail.com for account or data deletion requests."
 
 ## 6.1) Account deletion compliance (Google Play)
 
