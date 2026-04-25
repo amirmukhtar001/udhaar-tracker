@@ -108,11 +108,6 @@ export default function HomeScreen({ navigation }) {
     ]);
   };
 
-  const quickActions = [
-    { key: "Dashboard", label: t("home.dashboard") },
-    { key: "Borrowers", label: t("home.borrowers") }
-  ];
-
   return (
     <View style={styles.container}>
       <View style={styles.summaryRow}>
@@ -127,18 +122,6 @@ export default function HomeScreen({ navigation }) {
       </View>
       <View style={styles.recoveredBox}>
         <Text style={styles.recoveredText}>{t("home.recovered", { amount: `Rs. ${totalRecovered}` })}</Text>
-      </View>
-
-      <View style={styles.quickActionsRow}>
-        {quickActions.map((action) => (
-          <TouchableOpacity
-            key={action.key}
-            style={styles.quickActionBtn}
-            onPress={() => navigation.navigate(action.key)}
-          >
-            <Text style={styles.quickActionText}>{action.label}</Text>
-          </TouchableOpacity>
-        ))}
       </View>
 
       <TextInput
@@ -280,26 +263,6 @@ const styles = StyleSheet.create({
   recoveredText: {
     color: "#166534",
     fontWeight: "700"
-  },
-  quickActionsRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    flexWrap: "wrap",
-    marginBottom: 10
-  },
-  quickActionBtn: {
-    width: "48.5%",
-    backgroundColor: "#fff",
-    borderWidth: 1,
-    borderColor: "#d1d5db",
-    borderRadius: 10,
-    paddingVertical: 10,
-    alignItems: "center"
-  },
-  quickActionText: {
-    color: "#1f2937",
-    fontWeight: "700",
-    fontSize: 13
   },
   statLabel: {
     fontSize: 13,
