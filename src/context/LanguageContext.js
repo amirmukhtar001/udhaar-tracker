@@ -2,8 +2,11 @@ import React, { createContext, useContext, useEffect, useMemo, useState } from "
 import { getSelectedLanguage, setSelectedLanguage } from "../storage/languageStorage";
 import { DEFAULT_LANGUAGE, SUPPORTED_LANGUAGES, translations } from "../i18n/translations";
 
+const RTL_LANGUAGES = ["urdu", "sindhi", "arabic"];
+
 const LanguageContext = createContext({
   language: DEFAULT_LANGUAGE,
+  isRTL: false,
   hasSelectedLanguage: false,
   isLanguageReady: false,
   setLanguage: async () => {},
@@ -48,6 +51,7 @@ export function LanguageProvider({ children }) {
   const contextValue = useMemo(
     () => ({
       language,
+      isRTL: RTL_LANGUAGES.includes(language),
       hasSelectedLanguage,
       isLanguageReady,
       setLanguage,

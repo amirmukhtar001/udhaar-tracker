@@ -12,12 +12,16 @@ const LANGUAGE_OPTIONS = [
 ];
 
 export default function LanguageSelectScreen({ navigation }) {
-  const { setLanguage, t } = useLanguage();
+  const { language, setLanguage, t } = useLanguage();
   const { session } = useAuth();
-  const [selectedLanguage, setSelectedLanguageCode] = useState("roman_urdu");
+  const [selectedLanguage, setSelectedLanguageCode] = useState(language);
+
+  const handleSelectLanguage = async (languageCode) => {
+    setSelectedLanguageCode(languageCode);
+    await setLanguage(languageCode);
+  };
 
   const handleContinue = async () => {
-    await setLanguage(selectedLanguage);
     navigation.reset({
       index: 0,
       routes: [{ name: session ? "Home" : "PhoneAuth" }]
@@ -36,7 +40,7 @@ export default function LanguageSelectScreen({ navigation }) {
             <TouchableOpacity
               key={language.code}
               style={[styles.languageCard, isSelected ? styles.languageCardSelected : null]}
-              onPress={() => setSelectedLanguageCode(language.code)}
+              onPress={() => handleSelectLanguage(language.code)}
             >
               <Text style={styles.languageLabel}>{t(language.labelKey)}</Text>
             </TouchableOpacity>

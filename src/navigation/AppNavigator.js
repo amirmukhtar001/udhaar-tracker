@@ -43,10 +43,15 @@ function MenuButton({ onPress }) {
 }
 
 function MainStackNavigator() {
-  const { t } = useLanguage();
+  const { t, isRTL } = useLanguage();
 
   return (
-    <MainStack.Navigator>
+    <MainStack.Navigator
+      screenOptions={{
+        headerBackTitleVisible: false,
+        headerTitleAlign: isRTL ? "right" : "center"
+      }}
+    >
       <MainStack.Screen
         name="Home"
         component={HomeScreen}
@@ -95,7 +100,7 @@ function MainStackNavigator() {
 }
 
 function AppDrawerNavigator() {
-  const { t } = useLanguage();
+  const { t, isRTL } = useLanguage();
   const { signOut } = useAuth();
   const openUrl = async (url) => {
     try {
@@ -164,7 +169,7 @@ function AppDrawerNavigator() {
         </View>
       )}
       screenOptions={{
-        drawerPosition: "left"
+        drawerPosition: isRTL ? "right" : "left"
       }}
     >
       <Drawer.Screen
