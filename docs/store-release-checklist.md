@@ -49,7 +49,7 @@ Suggested short disclosure:
 
 - In-app path is available in `Legal & Support` -> `Request Account Deletion`.
 - Add web deletion URL in Play Console data deletion section:
-  - `https://udhaartracker.app/account-deletion`
+  - `https://amirmukhtar001.github.io/udhaar-tracker/account-deletion.html`
 - Make sure both in-app path and web URL describe what data is deleted and expected timeline.
 
 ## 7) Final QA before submit
