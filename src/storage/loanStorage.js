@@ -6,6 +6,16 @@ const LOANS_KEY = "loans";
 const LOANS_TABLE = "loans";
 const DEFAULT_LOAN_DIRECTION = "RECEIVABLE";
 
+function formatErrorMessage(error, fallback = "Unknown error") {
+  if (!error) return fallback;
+  if (typeof error === "string") return error;
+  if (typeof error.message === "string" && error.message.trim()) return error.message.trim();
+  if (typeof error.error_description === "string" && error.error_description.trim()) {
+    return error.error_description.trim();
+  }
+  return fallback;
+}
+
 function normalizeLoan(loan) {
   return {
     ...loan,
@@ -123,11 +133,11 @@ export async function getLoans() {
     try {
       return await syncLoansFromRemote();
     } catch (remoteError) {
-      console.warn("Supabase sync failed, using local cache", remoteError);
+      console.warn(`Supabase sync failed, using local cache: ${formatErrorMessage(remoteError)}`);
       return localLoans;
     }
   } catch (error) {
-    console.warn("Failed to load loans", error);
+    console.warn(`Failed to load loans: ${formatErrorMessage(error)}`);
     return [];
   }
 }
@@ -145,9 +155,9 @@ export async function addLoan(loan) {
       if (!error) {
         return await syncLoansFromRemote();
       }
-      console.warn("Supabase add loan failed, saving locally", error);
+      console.warn(`Supabase add loan failed, saving locally: ${formatErrorMessage(error)}`);
     } catch (remoteError) {
-      console.warn("Supabase add loan failed, saving locally", remoteError);
+      console.warn(`Supabase add loan failed, saving locally: ${formatErrorMessage(remoteError)}`);
     }
   }
 
@@ -168,9 +178,9 @@ export async function updateLoan(id, data) {
       if (!error) {
         return await syncLoansFromRemote();
       }
-      console.warn("Supabase update loan failed, using local cache", error);
+      console.warn(`Supabase update loan failed, using local cache: ${formatErrorMessage(error)}`);
     } catch (remoteError) {
-      console.warn("Supabase update loan failed, using local cache", remoteError);
+      console.warn(`Supabase update loan failed, using local cache: ${formatErrorMessage(remoteError)}`);
     }
   }
 
@@ -187,9 +197,9 @@ export async function deleteLoan(id) {
       if (!error) {
         return await syncLoansFromRemote();
       }
-      console.warn("Supabase delete loan failed, using local cache", error);
+      console.warn(`Supabase delete loan failed, using local cache: ${formatErrorMessage(error)}`);
     } catch (remoteError) {
-      console.warn("Supabase delete loan failed, using local cache", remoteError);
+      console.warn(`Supabase delete loan failed, using local cache: ${formatErrorMessage(remoteError)}`);
     }
   }
 

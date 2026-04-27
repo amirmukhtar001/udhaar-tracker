@@ -8,6 +8,9 @@ export default function LegalScreen() {
 
   const openUrl = async (url) => {
     try {
+      if (!url) throw new Error("URL is missing");
+      const supported = await Linking.canOpenURL(url);
+      if (!supported) throw new Error("URL is not supported");
       await Linking.openURL(url);
     } catch (_error) {
       Alert.alert(t("common.error"), t("legal.openUrlError"));
