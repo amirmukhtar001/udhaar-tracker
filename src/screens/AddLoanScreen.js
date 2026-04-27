@@ -25,7 +25,10 @@ const DIRECTION_OPTIONS = [
 
 function formatDatePart(date) {
   if (!date) return null;
-  return date.toISOString().split("T")[0];
+  const dd = String(date.getDate()).padStart(2, "0");
+  const mm = String(date.getMonth() + 1).padStart(2, "0");
+  const yyyy = String(date.getFullYear());
+  return `${dd}-${mm}-${yyyy}`;
 }
 
 function formatTimePart(date) {
@@ -41,6 +44,8 @@ export default function AddLoanScreen({ navigation }) {
   const [amount, setAmount] = useState("");
   const [note, setNote] = useState("");
   const [loanDirection, setLoanDirection] = useState("RECEIVABLE");
+  const [loanDate, setLoanDate] = useState(new Date());
+  const [showLoanDatePicker, setShowLoanDatePicker] = useState(false);
   const [reminderDate, setReminderDate] = useState(null);
   const [reminderRepeat, setReminderRepeat] = useState("NONE");
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -55,6 +60,17 @@ export default function AddLoanScreen({ navigation }) {
       const merged = new Date(selectedDate);
       merged.setHours(current.getHours(), current.getMinutes(), 0, 0);
       setReminderDate(merged);
+    }
+  };
+
+  const onLoanDateChange = (_, selectedDate) => {
+    if (Platform.OS === "android") {
+      setShowLoanDatePicker(false);
+    }
+    if (selectedDate) {
+      const normalized = new Date(selectedDate);
+      normalized.setHours(0, 0, 0, 0);
+      setLoanDate(normalized);
     }
   };
 
@@ -101,7 +117,7 @@ export default function AddLoanScreen({ navigation }) {
       note: note.trim(),
       loanDirection,
       payments: [],
-      date: new Date().toISOString().split("T")[0],
+      date: loanDate.toISOString().split("T")[0],
       reminderDate: reminderDate ? reminderDate.toISOString() : null,
       reminderRepeat,
       language,
@@ -163,6 +179,11 @@ export default function AddLoanScreen({ navigation }) {
         })}
       </View>
 
+      <Text style={styles.label}>{t("addLoan.loanDate")}</Text>
+      <TouchableOpacity style={styles.dateBtn} onPress={() => setShowLoanDatePicker(true)}>
+        <Text style={styles.dateBtnText}>{formatDatePart(loanDate)}</Text>
+      </TouchableOpacity>
+
       <Text style={styles.label}>{t("addLoan.reminderDateTime")}</Text>
       <TouchableOpacity style={styles.dateBtn} onPress={() => setShowDatePicker(true)}>
         <Text style={styles.dateBtnText}>
@@ -206,6 +227,16 @@ export default function AddLoanScreen({ navigation }) {
           display="default"
           onChange={onDateChange}
           minimumDate={new Date()}
+        />
+      )}
+
+      {showLoanDatePicker && (
+        <DateTimePicker
+          value={loanDate}
+          mode="date"
+          display="default"
+          onChange={onLoanDateChange}
+          maximumDate={new Date()}
         />
       )}
 

@@ -85,8 +85,8 @@ export default function DashboardScreen() {
         const totalPending = receivableLoans.reduce((sum, loan) => sum + getRemainingAmount(loan), 0);
         const totalPayable = payableLoans.reduce((sum, loan) => sum + getRemainingAmount(loan), 0);
         const overdueCount = loans.filter((loan) => isLoanOverdue(loan)).length;
-        const monthLent = loans
-          .filter((loan) => isInCurrentMonth(loan.createdAt))
+        const monthLent = receivableLoans
+          .filter((loan) => isInCurrentMonth(loan.date || loan.createdAt))
           .reduce((sum, loan) => sum + Number(loan.amount || 0), 0);
         const monthRecovered = loans.reduce((sum, loan) => {
           if (!Array.isArray(loan.payments)) return sum;

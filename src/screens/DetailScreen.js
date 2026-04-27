@@ -22,7 +22,10 @@ function formatShortDate(dateInput) {
   if (!dateInput) return "-";
   const date = new Date(dateInput);
   if (Number.isNaN(date.getTime())) return "-";
-  return date.toISOString().split("T")[0];
+  const dd = String(date.getDate()).padStart(2, "0");
+  const mm = String(date.getMonth() + 1).padStart(2, "0");
+  const yyyy = String(date.getFullYear());
+  return `${dd}-${mm}-${yyyy}`;
 }
 
 function formatShortTime(dateInput) {
@@ -116,7 +119,7 @@ export default function DetailScreen({ route, navigation }) {
             ? t("loan.direction.payableShort")
             : t("loan.direction.receivableShort")
         )}
-        {row(t("detail.row.date"), loan.date)}
+        {row(t("detail.row.date"), formatShortDate(loan.date))}
         {row(t("detail.row.reminderDate"), formatShortDate(loan.reminderDate))}
         {row(t("detail.row.reminderTime"), formatShortTime(loan.reminderDate))}
         {row(t("detail.row.reminderRepeat"), translateRepeatValue(loan.reminderRepeat, t))}

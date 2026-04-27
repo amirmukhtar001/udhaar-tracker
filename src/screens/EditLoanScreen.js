@@ -29,7 +29,10 @@ const DIRECTION_OPTIONS = [
 
 function formatDatePart(date) {
   if (!date) return null;
-  return date.toISOString().split("T")[0];
+  const dd = String(date.getDate()).padStart(2, "0");
+  const mm = String(date.getMonth() + 1).padStart(2, "0");
+  const yyyy = String(date.getFullYear());
+  return `${dd}-${mm}-${yyyy}`;
 }
 
 function formatTimePart(date) {
@@ -55,6 +58,8 @@ export default function EditLoanScreen({ route, navigation }) {
   const [amount, setAmount] = useState("");
   const [note, setNote] = useState("");
   const [loanDirection, setLoanDirection] = useState("RECEIVABLE");
+  const [loanDate, setLoanDate] = useState(new Date());
+  const [showLoanDatePicker, setShowLoanDatePicker] = useState(false);
   const [reminderDate, setReminderDate] = useState(null);
   const [reminderRepeat, setReminderRepeat] = useState("NONE");
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -71,6 +76,7 @@ export default function EditLoanScreen({ route, navigation }) {
         setAmount(String(found.amount || ""));
         setNote(found.note || "");
         setLoanDirection(found.loanDirection || "RECEIVABLE");
+        setLoanDate(parseDate(found.date) || new Date());
         setReminderDate(parseDate(found.reminderDate));
         setReminderRepeat(found.reminderRepeat || "NONE");
       }
@@ -89,6 +95,17 @@ export default function EditLoanScreen({ route, navigation }) {
       const merged = new Date(selectedDate);
       merged.setHours(current.getHours(), current.getMinutes(), 0, 0);
       setReminderDate(merged);
+    }
+  };
+
+  const onLoanDateChange = (_, selectedDate) => {
+    if (Platform.OS === "android") {
+      setShowLoanDatePicker(false);
+    }
+    if (selectedDate) {
+      const normalized = new Date(selectedDate);
+      normalized.setHours(0, 0, 0, 0);
+      setLoanDate(normalized);
     }
   };
 
@@ -157,6 +174,7 @@ export default function EditLoanScreen({ route, navigation }) {
         amount: numericAmount,
         note: note.trim(),
         loanDirection,
+        date: loanDate.toISOString().split("T")[0],
         reminderDate: nextReminderDate,
         reminderRepeat: nextReminderRepeat,
         language,
@@ -231,6 +249,11 @@ export default function EditLoanScreen({ route, navigation }) {
         })}
       </View>
 
+      <Text style={styles.label}>{t("addLoan.loanDate")}</Text>
+      <TouchableOpacity style={styles.dateBtn} onPress={() => setShowLoanDatePicker(true)}>
+        <Text style={styles.dateBtnText}>{formatDatePart(loanDate)}</Text>
+      </TouchableOpacity>
+
       <Text style={styles.label}>{t("addLoan.reminderDateTime")}</Text>
       <TouchableOpacity style={styles.dateBtn} onPress={() => setShowDatePicker(true)}>
         <Text style={styles.dateBtnText}>
@@ -274,6 +297,16 @@ export default function EditLoanScreen({ route, navigation }) {
           display="default"
           onChange={onDateChange}
           minimumDate={new Date()}
+        />
+      )}
+
+      {showLoanDatePicker && (
+        <DateTimePicker
+          value={loanDate}
+          mode="date"
+          display="default"
+          onChange={onLoanDateChange}
+          maximumDate={new Date()}
         />
       )}
 
