@@ -4,13 +4,18 @@ import { isSupabaseConfigured, supabase } from "../lib/supabaseClient";
 
 const LOANS_KEY = "loans";
 const LOANS_TABLE = "loans";
+const DEFAULT_LOAN_DIRECTION = "RECEIVABLE";
 
 function normalizeLoan(loan) {
   return {
     ...loan,
     payments: Array.isArray(loan.payments) ? loan.payments : [],
     reminderRepeat: loan.reminderRepeat || "NONE",
-    language: loan.language || DEFAULT_LANGUAGE
+    language: loan.language || DEFAULT_LANGUAGE,
+    loanDirection:
+      loan.loanDirection === "PAYABLE" || loan.loanDirection === "RECEIVABLE"
+        ? loan.loanDirection
+        : DEFAULT_LOAN_DIRECTION
   };
 }
 
@@ -27,7 +32,8 @@ function fromRemoteRow(row) {
     isPaid: Boolean(row.is_paid),
     createdAt: row.created_at || new Date().toISOString(),
     notificationId: row.notification_id || null,
-    language: row.language || DEFAULT_LANGUAGE
+    language: row.language || DEFAULT_LANGUAGE,
+    loanDirection: row.loan_direction || DEFAULT_LOAN_DIRECTION
   });
 }
 
@@ -46,7 +52,8 @@ function toRemoteRow(loan) {
     created_at: normalized.createdAt || new Date().toISOString(),
     updated_at: new Date().toISOString(),
     notification_id: normalized.notificationId || null,
-    language: normalized.language || DEFAULT_LANGUAGE
+    language: normalized.language || DEFAULT_LANGUAGE,
+    loan_direction: normalized.loanDirection || DEFAULT_LOAN_DIRECTION
   };
 }
 
@@ -70,6 +77,12 @@ function toRemotePatch(data) {
   }
   if (Object.prototype.hasOwnProperty.call(data, "language")) {
     patch.language = data.language || DEFAULT_LANGUAGE;
+  }
+  if (Object.prototype.hasOwnProperty.call(data, "loanDirection")) {
+    patch.loan_direction =
+      data.loanDirection === "PAYABLE" || data.loanDirection === "RECEIVABLE"
+        ? data.loanDirection
+        : DEFAULT_LOAN_DIRECTION;
   }
 
   return patch;

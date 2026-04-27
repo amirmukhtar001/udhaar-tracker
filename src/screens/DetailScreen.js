@@ -110,6 +110,12 @@ export default function DetailScreen({ route, navigation }) {
         {row(t("detail.row.paid"), `Rs. ${totalPaid}`)}
         {row(t("detail.row.remaining"), `Rs. ${remainingAmount}`)}
         {row(t("detail.row.note"), loan.note || "-")}
+        {row(
+          t("detail.row.direction"),
+          loan.loanDirection === "PAYABLE"
+            ? t("loan.direction.payableShort")
+            : t("loan.direction.receivableShort")
+        )}
         {row(t("detail.row.date"), loan.date)}
         {row(t("detail.row.reminderDate"), formatShortDate(loan.reminderDate))}
         {row(t("detail.row.reminderTime"), formatShortTime(loan.reminderDate))}

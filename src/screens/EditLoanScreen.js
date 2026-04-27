@@ -22,6 +22,10 @@ const REPEAT_OPTIONS = [
   { key: "DAILY", labelKey: "common.daily" },
   { key: "WEEKLY", labelKey: "common.weekly" }
 ];
+const DIRECTION_OPTIONS = [
+  { key: "RECEIVABLE", labelKey: "loan.direction.receivable" },
+  { key: "PAYABLE", labelKey: "loan.direction.payable" }
+];
 
 function formatDatePart(date) {
   if (!date) return null;
@@ -50,6 +54,7 @@ export default function EditLoanScreen({ route, navigation }) {
   const [name, setName] = useState("");
   const [amount, setAmount] = useState("");
   const [note, setNote] = useState("");
+  const [loanDirection, setLoanDirection] = useState("RECEIVABLE");
   const [reminderDate, setReminderDate] = useState(null);
   const [reminderRepeat, setReminderRepeat] = useState("NONE");
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -65,6 +70,7 @@ export default function EditLoanScreen({ route, navigation }) {
         setName(found.name || "");
         setAmount(String(found.amount || ""));
         setNote(found.note || "");
+        setLoanDirection(found.loanDirection || "RECEIVABLE");
         setReminderDate(parseDate(found.reminderDate));
         setReminderRepeat(found.reminderRepeat || "NONE");
       }
@@ -150,6 +156,7 @@ export default function EditLoanScreen({ route, navigation }) {
         name: cleanName,
         amount: numericAmount,
         note: note.trim(),
+        loanDirection,
         reminderDate: nextReminderDate,
         reminderRepeat: nextReminderRepeat,
         language,
@@ -205,6 +212,24 @@ export default function EditLoanScreen({ route, navigation }) {
         placeholder={t("addLoan.placeholder.note")}
         style={styles.input}
       />
+
+      <Text style={styles.label}>{t("addLoan.direction")}</Text>
+      <View style={styles.repeatRow}>
+        {DIRECTION_OPTIONS.map((option) => {
+          const isActive = loanDirection === option.key;
+          return (
+            <TouchableOpacity
+              key={option.key}
+              style={[styles.repeatChip, isActive ? styles.repeatChipActive : null]}
+              onPress={() => setLoanDirection(option.key)}
+            >
+              <Text style={[styles.repeatChipText, isActive ? styles.repeatChipTextActive : null]}>
+                {t(option.labelKey)}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
 
       <Text style={styles.label}>{t("addLoan.reminderDateTime")}</Text>
       <TouchableOpacity style={styles.dateBtn} onPress={() => setShowDatePicker(true)}>

@@ -28,6 +28,8 @@ export default function LoanItem({
   isOverdue = false,
   overdueDays = 0,
   remainingAmount = Number(loan.amount || 0),
+  directionType = "RECEIVABLE",
+  directionLabel = "",
   statusText = loan.isPaid ? "Paid" : "Unpaid",
   onPress,
   onAddPayment,
@@ -56,6 +58,21 @@ export default function LoanItem({
         <View>
           <Text style={styles.name}>{loan.name}</Text>
           <Text style={styles.note}>{loan.note || t("loan.noNote")}</Text>
+          <View
+            style={[
+              styles.directionBadge,
+              directionType === "PAYABLE" ? styles.payableBadge : styles.receivableBadge
+            ]}
+          >
+            <Text
+              style={[
+                styles.directionText,
+                directionType === "PAYABLE" ? styles.payableText : styles.receivableText
+              ]}
+            >
+              {directionLabel}
+            </Text>
+          </View>
           {isOverdue ? (
             <View style={styles.overdueBadge}>
               <Text style={styles.overdueText}>{t("loan.overdueByDays", { days: overdueDays })}</Text>
@@ -115,6 +132,29 @@ const styles = StyleSheet.create({
     color: "#b91c1c",
     fontWeight: "700",
     fontSize: 12
+  },
+  directionBadge: {
+    marginTop: 6,
+    alignSelf: "flex-start",
+    borderRadius: 999,
+    paddingHorizontal: 10,
+    paddingVertical: 3
+  },
+  receivableBadge: {
+    backgroundColor: "#dcfce7"
+  },
+  payableBadge: {
+    backgroundColor: "#ffedd5"
+  },
+  directionText: {
+    fontSize: 11,
+    fontWeight: "700"
+  },
+  receivableText: {
+    color: "#166534"
+  },
+  payableText: {
+    color: "#c2410c"
   },
   right: {
     alignItems: "flex-end"

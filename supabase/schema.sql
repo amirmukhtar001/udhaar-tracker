@@ -8,6 +8,7 @@ create table if not exists public.loans (
   loan_date text,
   reminder_date timestamptz,
   reminder_repeat text not null default 'NONE',
+  loan_direction text not null default 'RECEIVABLE',
   is_paid boolean not null default false,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
@@ -20,6 +21,16 @@ alter table public.loans
 
 alter table public.loans
   alter column user_id set default auth.uid();
+
+alter table public.loans
+  add column if not exists loan_direction text not null default 'RECEIVABLE';
+
+alter table public.loans
+  drop constraint if exists loans_loan_direction_check;
+
+alter table public.loans
+  add constraint loans_loan_direction_check
+  check (loan_direction in ('RECEIVABLE', 'PAYABLE'));
 
 create index if not exists idx_loans_user_id on public.loans(user_id);
 

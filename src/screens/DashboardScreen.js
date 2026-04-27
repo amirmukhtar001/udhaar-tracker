@@ -62,6 +62,7 @@ export default function DashboardScreen() {
     totalLent: 0,
     totalRecovered: 0,
     totalPending: 0,
+    totalPayable: 0,
     overdueCount: 0,
     monthLent: 0,
     monthRecovered: 0,
@@ -76,10 +77,13 @@ export default function DashboardScreen() {
     useCallback(() => {
       const load = async () => {
         const loans = await getLoans();
+        const receivableLoans = loans.filter((loan) => loan.loanDirection !== "PAYABLE");
+        const payableLoans = loans.filter((loan) => loan.loanDirection === "PAYABLE");
 
-        const totalLent = loans.reduce((sum, loan) => sum + Number(loan.amount || 0), 0);
-        const totalRecovered = loans.reduce((sum, loan) => sum + getTotalPaid(loan), 0);
-        const totalPending = loans.reduce((sum, loan) => sum + getRemainingAmount(loan), 0);
+        const totalLent = receivableLoans.reduce((sum, loan) => sum + Number(loan.amount || 0), 0);
+        const totalRecovered = receivableLoans.reduce((sum, loan) => sum + getTotalPaid(loan), 0);
+        const totalPending = receivableLoans.reduce((sum, loan) => sum + getRemainingAmount(loan), 0);
+        const totalPayable = payableLoans.reduce((sum, loan) => sum + getRemainingAmount(loan), 0);
         const overdueCount = loans.filter((loan) => isLoanOverdue(loan)).length;
         const monthLent = loans
           .filter((loan) => isInCurrentMonth(loan.createdAt))
@@ -110,6 +114,7 @@ export default function DashboardScreen() {
           totalLent,
           totalRecovered,
           totalPending,
+          totalPayable,
           overdueCount,
           monthLent,
           monthRecovered,
@@ -154,7 +159,7 @@ export default function DashboardScreen() {
           tint={styles.green}
         />
         <StatCard label={t("dashboard.totalPending")} value={formatCurrency(stats.totalPending)} tint={styles.red} />
-        <StatCard label={t("dashboard.overdueLoans")} value={String(stats.overdueCount)} tint={styles.orange} />
+        <StatCard label={t("dashboard.totalPayable")} value={formatCurrency(stats.totalPayable)} tint={styles.orange} />
       </View>
 
       <Text style={styles.sectionTitle}>{t("dashboard.section.portfolio")}</Text>

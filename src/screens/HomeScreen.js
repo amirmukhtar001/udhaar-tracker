@@ -41,9 +41,11 @@ export default function HomeScreen({ navigation }) {
     }, [loadLoans, navigation])
   );
 
-  const totalGiven = loans.reduce((sum, loan) => sum + Number(loan.amount || 0), 0);
-  const totalRecovered = loans.reduce((sum, loan) => sum + getTotalPaid(loan), 0);
-  const totalPending = loans.reduce((sum, loan) => sum + getRemainingAmount(loan), 0);
+  const receivableLoans = loans.filter((loan) => loan.loanDirection !== "PAYABLE");
+  const payableLoans = loans.filter((loan) => loan.loanDirection === "PAYABLE");
+  const totalToReceive = receivableLoans.reduce((sum, loan) => sum + getRemainingAmount(loan), 0);
+  const totalToPay = payableLoans.reduce((sum, loan) => sum + getRemainingAmount(loan), 0);
+  const netPosition = totalToReceive - totalToPay;
 
   const normalizedQuery = searchQuery.trim().toLowerCase();
 
@@ -113,16 +115,18 @@ export default function HomeScreen({ navigation }) {
     <View style={styles.container}>
       <View style={styles.summaryRow}>
         <View style={[styles.statCard, styles.givenCard]}>
-          <Text style={styles.statLabel}>{t("home.totalGiven")}</Text>
-          <Text style={styles.statValue}>Rs. {totalGiven}</Text>
+          <Text style={styles.statLabel}>{t("home.totalReceive")}</Text>
+          <Text style={styles.statValue}>Rs. {totalToReceive}</Text>
         </View>
         <View style={[styles.statCard, styles.pendingCard]}>
-          <Text style={styles.statLabel}>{t("home.totalPending")}</Text>
-          <Text style={styles.statValue}>Rs. {totalPending}</Text>
+          <Text style={styles.statLabel}>{t("home.totalPay")}</Text>
+          <Text style={styles.statValue}>Rs. {totalToPay}</Text>
         </View>
       </View>
       <View style={styles.recoveredBox}>
-        <Text style={styles.recoveredText}>{t("home.recovered", { amount: `Rs. ${totalRecovered}` })}</Text>
+        <Text style={styles.recoveredText}>
+          {t("home.netPosition", { amount: `${netPosition >= 0 ? "+" : "-"}Rs. ${Math.abs(netPosition)}` })}
+        </Text>
       </View>
 
       <TextInput
@@ -165,6 +169,10 @@ export default function HomeScreen({ navigation }) {
             overdueDays={getOverdueDays(item)}
             remainingAmount={getRemainingAmount(item)}
             statusText={getLoanStatus(item)}
+            directionType={item.loanDirection}
+            directionLabel={t(
+              item.loanDirection === "PAYABLE" ? "loan.direction.payableShort" : "loan.direction.receivableShort"
+            )}
             onPress={() => navigation.navigate("Detail", { loanId: item.id })}
             onAddPayment={() => navigation.navigate("AddPayment", { loanId: item.id })}
             onEdit={() => navigation.navigate("EditLoan", { loanId: item.id })}
