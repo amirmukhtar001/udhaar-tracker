@@ -57,7 +57,12 @@ function MainStackNavigator() {
         component={HomeScreen}
         options={({ navigation }) => ({
           title: t("screen.home"),
-          headerLeft: () => <MenuButton onPress={() => navigation.getParent()?.openDrawer()} />
+          headerLeft: isRTL
+            ? undefined
+            : () => <MenuButton onPress={() => navigation.getParent()?.openDrawer()} />,
+          headerRight: isRTL
+            ? () => <MenuButton onPress={() => navigation.getParent()?.openDrawer()} />
+            : undefined
         })}
       />
       <MainStack.Screen
@@ -135,6 +140,7 @@ function AppDrawerNavigator() {
 
   return (
     <Drawer.Navigator
+      key={`drawer-${isRTL ? "rtl" : "ltr"}`}
       drawerContent={(props) => (
         <View style={styles.drawerContentContainer}>
           <DrawerContentScrollView {...props} contentContainerStyle={styles.drawerScrollContent}>
@@ -169,7 +175,13 @@ function AppDrawerNavigator() {
         </View>
       )}
       screenOptions={{
-        drawerPosition: isRTL ? "right" : "left"
+        drawerPosition: isRTL ? "right" : "left",
+        drawerType: "front",
+        swipeEnabled: false,
+        overlayColor: "rgba(15, 23, 42, 0.18)",
+        drawerStyle: {
+          width: "78%"
+        }
       }}
     >
       <Drawer.Screen
@@ -187,7 +199,7 @@ function AppDrawerNavigator() {
 }
 
 export default function AppNavigator() {
-  const { hasSelectedLanguage, isLanguageReady, t } = useLanguage();
+  const { hasSelectedLanguage, isLanguageReady, t, isRTL } = useLanguage();
   const { session, isAuthReady } = useAuth();
 
   if (!isLanguageReady || !isAuthReady) {
@@ -214,11 +226,7 @@ export default function AppNavigator() {
             options={{ title: t("screen.phoneAuth"), headerLeft: () => null }}
           />
         ) : (
-          <RootStack.Screen
-            name="AppDrawer"
-            component={AppDrawerNavigator}
-            options={{ headerShown: false }}
-          />
+          <RootStack.Screen name="AppDrawer" component={AppDrawerNavigator} options={{ headerShown: false }} />
         )}
       </RootStack.Navigator>
     </NavigationContainer>

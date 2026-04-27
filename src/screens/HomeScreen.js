@@ -36,8 +36,9 @@ export default function HomeScreen({ navigation }) {
 
   useFocusEffect(
     useCallback(() => {
+      navigation.getParent()?.closeDrawer?.();
       loadLoans();
-    }, [loadLoans])
+    }, [loadLoans, navigation])
   );
 
   const totalGiven = loans.reduce((sum, loan) => sum + Number(loan.amount || 0), 0);

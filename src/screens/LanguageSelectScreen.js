@@ -4,15 +4,15 @@ import { useLanguage } from "../context/LanguageContext";
 import { useAuth } from "../context/AuthContext";
 
 const LANGUAGE_OPTIONS = [
-  { code: "roman_urdu", labelKey: "lang.roman_urdu" },
-  { code: "urdu", labelKey: "lang.urdu" },
-  { code: "english", labelKey: "lang.english" },
-  { code: "sindhi", labelKey: "lang.sindhi" },
-  { code: "arabic", labelKey: "lang.arabic" }
+  { code: "roman_urdu", label: "Roman urdu" },
+  { code: "urdu", label: "Urdu" },
+  { code: "english", label: "English" },
+  { code: "sindhi", label: "Sindhi" },
+  { code: "arabic", label: "Arabic" }
 ];
 
 export default function LanguageSelectScreen({ navigation }) {
-  const { language, setLanguage, t } = useLanguage();
+  const { language, setLanguage } = useLanguage();
   const { session } = useAuth();
   const [selectedLanguage, setSelectedLanguageCode] = useState(language);
 
@@ -22,17 +22,30 @@ export default function LanguageSelectScreen({ navigation }) {
   };
 
   const handleContinue = async () => {
-    navigation.reset({
-      index: 0,
-      routes: [{ name: session ? "Home" : "PhoneAuth" }]
-    });
+    if (session) {
+      navigation.getParent()?.closeDrawer?.();
+      navigation.reset({
+        index: 0,
+        routes: [{ name: "Home" }]
+      });
+      return;
+    }
+
+    const parent = navigation.getParent();
+    if (navigation.getState?.()?.routeNames?.includes("PhoneAuth")) {
+      navigation.navigate("PhoneAuth");
+      return;
+    }
+    if (parent?.getState?.()?.routeNames?.includes("PhoneAuth")) {
+      parent.navigate("PhoneAuth");
+    }
   };
 
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.content}>
-        <Text style={styles.title}>{t("lang.welcome")}</Text>
-        <Text style={styles.subtitle}>{t("lang.select")}</Text>
+        <Text style={styles.title}>Udhaar Book welcomes you!</Text>
+        <Text style={styles.subtitle}>Select your language</Text>
 
         {LANGUAGE_OPTIONS.map((language) => {
           const isSelected = selectedLanguage === language.code;
@@ -42,14 +55,14 @@ export default function LanguageSelectScreen({ navigation }) {
               style={[styles.languageCard, isSelected ? styles.languageCardSelected : null]}
               onPress={() => handleSelectLanguage(language.code)}
             >
-              <Text style={styles.languageLabel}>{t(language.labelKey)}</Text>
+              <Text style={styles.languageLabel}>{language.label}</Text>
             </TouchableOpacity>
           );
         })}
       </ScrollView>
 
       <TouchableOpacity style={styles.nextButton} onPress={handleContinue}>
-        <Text style={styles.nextButtonText}>{t("common.next")}</Text>
+        <Text style={styles.nextButtonText}>NEXT</Text>
       </TouchableOpacity>
     </View>
   );
