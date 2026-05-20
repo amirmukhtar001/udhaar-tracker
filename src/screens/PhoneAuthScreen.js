@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -33,22 +33,13 @@ function extractTokenHash(input) {
   }
 }
 
-export default function PhoneAuthScreen({ navigation }) {
-  const { session, sendOtp, verifyOtp, verifyOtpTokenHash, isSupabaseEnabled } = useAuth();
+export default function PhoneAuthScreen() {
+  const { sendOtp, verifyOtp, verifyOtpTokenHash, isSupabaseEnabled } = useAuth();
   const { t } = useLanguage();
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
   const [otpSent, setOtpSent] = useState(false);
   const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    if (session) {
-      navigation.reset({
-        index: 0,
-        routes: [{ name: "Home" }]
-      });
-    }
-  }, [session, navigation]);
 
   const handleSendOtp = async () => {
     const normalizedEmail = String(email || "").trim().toLowerCase();

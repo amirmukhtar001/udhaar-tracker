@@ -7,7 +7,9 @@
     "userInterfaceStyle": "light",
     "scheme": "smartudhaar",
     "icon": "./assets/icon.png",
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
@@ -25,7 +27,9 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#0f172a"
       },
-      "permissions": ["POST_NOTIFICATIONS"],
+      "permissions": [
+        "POST_NOTIFICATIONS"
+      ],
       "blockedPermissions": [
         "android.permission.READ_EXTERNAL_STORAGE",
         "android.permission.WRITE_EXTERNAL_STORAGE",
@@ -43,7 +47,11 @@
     "extra": {
       "supportEmail": "amirmukhtar001@gmail.com",
       "privacyPolicyUrl": "https://amirmukhtar001.github.io/udhaar-tracker/privacy-policy.html",
-      "accountDeletionUrl": "https://amirmukhtar001.github.io/udhaar-tracker/account-deletion.html"
-    }
+      "accountDeletionUrl": "https://amirmukhtar001.github.io/udhaar-tracker/account-deletion.html",
+      "eas": {
+        "projectId": "addfaea7-02b1-4e2d-9522-7a089d2ec048"
+      }
+    },
+    "owner": "amirmukhtar001"
   }
 }
