@@ -4,8 +4,11 @@ node_modules/
 /.expo/**
 dist/
 build/
+android/.gradle/
 android/app/build/
+android/build/
 ios/build/
+**/.gradle/
 *.log
 .env
 .DS_Store
